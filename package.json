@@ -1,0 +1,11 @@
+{
+  "name": "javascript-extension",
+  "version": "1.0.0",
+  "description": "This is a Javascript Extension Starter which includes a few simple API calls.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx prettier --write ."
+  },
+  "author": "Replit",
+  "license": "MIT"
+}
