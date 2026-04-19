@@ -47,9 +47,103 @@ function today() {
   });
 }
 
+function setWizardStep(stepNum) {
+  const steps = document.querySelectorAll(".step");
+  const lines = document.querySelectorAll(".step-line");
+  const panels = document.querySelectorAll(".wizard-step");
+
+  panels.forEach((p, i) => {
+    p.style.display = i + 1 === stepNum ? "flex" : "none";
+  });
+
+  steps.forEach((s, i) => {
+    s.classList.remove("active", "completed");
+    if (i + 1 === stepNum) s.classList.add("active");
+    else if (i + 1 < stepNum) s.classList.add("completed");
+  });
+
+  lines.forEach((l, i) => {
+    l.classList.toggle("completed", i + 1 < stepNum);
+  });
+}
+
+function buildReviewSummary(client) {
+  const budgetLabels = {
+    "under-1k": "Under $1,000",
+    "1k-5k": "$1,000 – $5,000",
+    "5k-10k": "$5,000 – $10,000",
+    "10k-25k": "$10,000 – $25,000",
+    "25k-plus": "$25,000+",
+  };
+  const timelineLabels = {
+    "1-2-weeks": "1–2 Weeks",
+    "1-month": "1 Month",
+    "2-3-months": "2–3 Months",
+    "3-6-months": "3–6 Months",
+    "6-months-plus": "6+ Months",
+  };
+  const rows = [
+    ["Client", client.name],
+    ["Company", client.company],
+    ["Email", client.email || "—"],
+    ["Phone", client.phone || "—"],
+    ["Project Type", client.projectType.replace(/-/g, " ") || "—"],
+    ["Budget", budgetLabels[client.budget] || "—"],
+    ["Start Date", client.startDate || "TBC"],
+    ["Duration", timelineLabels[client.timeline] || "—"],
+  ];
+  return rows
+    .map(
+      ([label, value]) =>
+        `<div class="review-row"><span class="review-label">${label}</span><span class="review-value">${value}</span></div>`
+    )
+    .join("");
+}
+
 function setupOnboardingWizard() {
   const form = document.getElementById("onboarding-form");
   const resultPanel = document.getElementById("onboarding-result");
+
+  setWizardStep(1);
+
+  document.getElementById("step1-next").addEventListener("click", () => {
+    const name = document.getElementById("client-name").value.trim();
+    const company = document.getElementById("client-company").value.trim();
+    if (!name || !company) {
+      alert("Please enter the Client Name and Company Name to continue.");
+      return;
+    }
+    setWizardStep(2);
+  });
+
+  document.getElementById("step2-back").addEventListener("click", () => {
+    setWizardStep(1);
+  });
+
+  document.getElementById("step2-next").addEventListener("click", () => {
+    const type = document.getElementById("project-type").value;
+    if (!type) {
+      alert("Please select a Project Type to continue.");
+      return;
+    }
+    const client = {
+      name: document.getElementById("client-name").value.trim(),
+      company: document.getElementById("client-company").value.trim(),
+      email: document.getElementById("client-email").value.trim(),
+      phone: document.getElementById("client-phone").value.trim(),
+      projectType: type,
+      budget: document.getElementById("project-budget").value,
+      startDate: document.getElementById("project-start").value,
+      timeline: document.getElementById("project-timeline").value,
+      requirements: document.getElementById("project-requirements").value.trim(),
+    };
+    document.getElementById("review-summary").innerHTML = buildReviewSummary(client);
+    setWizardStep(3);
+  });
+
+  document.getElementById("step3-back").addEventListener("click", () => {
+    setWizardStep(2);
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -100,6 +194,9 @@ function setupOnboardingWizard() {
         "Client folder set up at <code>" + folderName + "/</code> with contract, checklist, and brief.",
         createdFiles
       );
+      try {
+        await replit.messages.showConfirm("✅ Onboarding files created for " + client.company + "!");
+      } catch (_) {}
     } catch (err) {
       resultPanel.className = "error-panel";
       resultPanel.style.display = "block";
@@ -360,6 +457,9 @@ function setupLaunchKitGenerator() {
         "Your marketing pack for <strong>" + service.name + "</strong> has been saved to <code>" + folderName + "/</code>",
         createdFiles
       );
+      try {
+        await replit.messages.showConfirm("🚀 Launch Kit generated for " + service.name + "!");
+      } catch (_) {}
     } catch (err) {
       resultPanel.className = "error-panel";
       resultPanel.style.display = "block";

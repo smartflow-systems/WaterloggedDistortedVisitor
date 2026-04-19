@@ -41,91 +41,149 @@
         <div id="tab-onboarding" class="tab-content active">
           <div class="tool-header">
             <h2>Client Onboarding Wizard</h2>
-            <p>Fill in the client details below. The wizard will automatically generate a project folder, contract template, and task checklist in your workspace.</p>
+            <p>Complete the 3 steps below to automatically generate a project folder, contract, and task checklist for your new client.</p>
+          </div>
+
+          <!-- Step Indicator -->
+          <div class="step-indicator">
+            <div class="step active" data-step="1">
+              <div class="step-num">1</div>
+              <div class="step-label">Client Info</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2">
+              <div class="step-num">2</div>
+              <div class="step-label">Project Details</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3">
+              <div class="step-num">3</div>
+              <div class="step-label">Review & Generate</div>
+            </div>
           </div>
 
           <form id="onboarding-form" class="toolkit-form">
-            <div class="form-section">
-              <h3>Client Information</h3>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="client-name">Client Name *</label>
-                  <input type="text" id="client-name" placeholder="e.g. John Smith" required />
+
+            <!-- STEP 1: Client Information -->
+            <div class="wizard-step" id="wizard-step-1">
+              <div class="form-section">
+                <h3>Step 1 — Client Information</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="client-name">Client Name *</label>
+                    <input type="text" id="client-name" placeholder="e.g. John Smith" />
+                  </div>
+                  <div class="form-group">
+                    <label for="client-company">Company Name *</label>
+                    <input type="text" id="client-company" placeholder="e.g. Acme Corp" />
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="client-company">Company Name *</label>
-                  <input type="text" id="client-company" placeholder="e.g. Acme Corp" required />
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="client-email">Email Address</label>
+                    <input type="email" id="client-email" placeholder="e.g. john@acme.com" />
+                  </div>
+                  <div class="form-group">
+                    <label for="client-phone">Phone Number</label>
+                    <input type="text" id="client-phone" placeholder="e.g. +1 555 0123" />
+                  </div>
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="client-email">Email Address</label>
-                  <input type="email" id="client-email" placeholder="e.g. john@acme.com" />
-                </div>
-                <div class="form-group">
-                  <label for="client-phone">Phone Number</label>
-                  <input type="text" id="client-phone" placeholder="e.g. +1 555 0123" />
-                </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="step1-next">
+                  Next: Project Details →
+                </button>
               </div>
             </div>
 
-            <div class="form-section">
-              <h3>Project Details</h3>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="project-type">Project Type *</label>
-                  <select id="project-type" required>
-                    <option value="">Select type...</option>
-                    <option value="web-development">Web Development</option>
-                    <option value="mobile-app">Mobile App</option>
-                    <option value="automation">Automation / Systems</option>
-                    <option value="consulting">Consulting</option>
-                    <option value="marketing">Digital Marketing</option>
-                    <option value="design">UI/UX Design</option>
-                    <option value="other">Other</option>
-                  </select>
+            <!-- STEP 2: Project Details -->
+            <div class="wizard-step" id="wizard-step-2" style="display:none;">
+              <div class="form-section">
+                <h3>Step 2 — Project Details</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="project-type">Project Type *</label>
+                    <select id="project-type">
+                      <option value="">Select type...</option>
+                      <option value="web-development">Web Development</option>
+                      <option value="mobile-app">Mobile App</option>
+                      <option value="automation">Automation / Systems</option>
+                      <option value="consulting">Consulting</option>
+                      <option value="marketing">Digital Marketing</option>
+                      <option value="design">UI/UX Design</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="project-budget">Budget Range</label>
+                    <select id="project-budget">
+                      <option value="">Select range...</option>
+                      <option value="under-1k">Under $1,000</option>
+                      <option value="1k-5k">$1,000 – $5,000</option>
+                      <option value="5k-10k">$5,000 – $10,000</option>
+                      <option value="10k-25k">$10,000 – $25,000</option>
+                      <option value="25k-plus">$25,000+</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="project-budget">Budget Range</label>
-                  <select id="project-budget">
-                    <option value="">Select range...</option>
-                    <option value="under-1k">Under $1,000</option>
-                    <option value="1k-5k">$1,000 – $5,000</option>
-                    <option value="5k-10k">$5,000 – $10,000</option>
-                    <option value="10k-25k">$10,000 – $25,000</option>
-                    <option value="25k-plus">$25,000+</option>
-                  </select>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="project-start">Start Date</label>
+                    <input type="date" id="project-start" />
+                  </div>
+                  <div class="form-group">
+                    <label for="project-timeline">Estimated Duration</label>
+                    <select id="project-timeline">
+                      <option value="">Select duration...</option>
+                      <option value="1-2-weeks">1–2 Weeks</option>
+                      <option value="1-month">1 Month</option>
+                      <option value="2-3-months">2–3 Months</option>
+                      <option value="3-6-months">3–6 Months</option>
+                      <option value="6-months-plus">6+ Months</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label for="project-requirements">Project Requirements & Notes</label>
+                  <textarea id="project-requirements" rows="4" placeholder="Describe what the client needs, key deliverables, special requirements, etc."></textarea>
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="project-start">Start Date</label>
-                  <input type="date" id="project-start" />
-                </div>
-                <div class="form-group">
-                  <label for="project-timeline">Estimated Duration</label>
-                  <select id="project-timeline">
-                    <option value="">Select duration...</option>
-                    <option value="1-2-weeks">1–2 Weeks</option>
-                    <option value="1-month">1 Month</option>
-                    <option value="2-3-months">2–3 Months</option>
-                    <option value="3-6-months">3–6 Months</option>
-                    <option value="6-months-plus">6+ Months</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group full-width">
-                <label for="project-requirements">Project Requirements & Notes</label>
-                <textarea id="project-requirements" rows="4" placeholder="Describe what the client needs, key deliverables, special requirements, etc."></textarea>
+              <div class="form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="step2-back">
+                  ← Back
+                </button>
+                <button type="button" class="btn btn-primary" id="step2-next">
+                  Next: Review →
+                </button>
               </div>
             </div>
 
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" id="onboarding-submit">
-                <span class="btn-icon">⚡</span>
-                Generate Onboarding Files
-              </button>
+            <!-- STEP 3: Review & Generate -->
+            <div class="wizard-step" id="wizard-step-3" style="display:none;">
+              <div class="form-section">
+                <h3>Step 3 — Review & Generate</h3>
+                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">Check the details below, then click Generate to create all your onboarding files.</p>
+                <div id="review-summary" class="review-summary"></div>
+              </div>
+              <div class="form-section" style="background:rgba(74,158,255,0.05);border-color:rgba(74,158,255,0.3);">
+                <h3 style="color:var(--accent);">Files that will be created</h3>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div class="result-file"><span class="result-file-icon">📄</span><div><div>Contract template</div><div class="result-file-path">clients/&lt;company&gt;/contract.md</div></div></div>
+                  <div class="result-file"><span class="result-file-icon">✅</span><div><div>Task checklist</div><div class="result-file-path">clients/&lt;company&gt;/task-checklist.md</div></div></div>
+                  <div class="result-file"><span class="result-file-icon">📋</span><div><div>Client brief</div><div class="result-file-path">clients/&lt;company&gt;/client-brief.md</div></div></div>
+                </div>
+              </div>
+              <div class="form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="step3-back">
+                  ← Back
+                </button>
+                <button type="submit" class="btn btn-primary" id="onboarding-submit">
+                  <span class="btn-icon">⚡</span>
+                  Generate Onboarding Files
+                </button>
+              </div>
             </div>
+
           </form>
 
           <div id="onboarding-result" class="result-panel" style="display:none;"></div>

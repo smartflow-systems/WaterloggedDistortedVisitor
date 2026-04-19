@@ -321,6 +321,126 @@ input[type="date"] {
   font-size: 15px;
 }
 
+/* STEP INDICATOR */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  margin-bottom: 4px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.step.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.step.completed .step-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.step-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.step.active .step-label {
+  color: var(--accent);
+}
+
+.step.completed .step-label {
+  color: var(--success);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 8px;
+  margin-bottom: 18px;
+  transition: background 0.3s;
+}
+
+.step-line.completed {
+  background: var(--success);
+}
+
+/* WIZARD STEP */
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* STEP ACTIONS */
+.step-actions {
+  justify-content: space-between !important;
+}
+
+/* SECONDARY BUTTON */
+.btn-secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* REVIEW SUMMARY */
+.review-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-row {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.review-label {
+  color: var(--text-muted);
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.review-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
 /* RESULT PANEL */
 .result-panel {
   background: var(--success-bg);
