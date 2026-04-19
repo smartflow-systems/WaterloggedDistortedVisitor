@@ -3,7 +3,7 @@ async function main() {
   try {
     await Promise.race([
       replit.init(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 6000)),
     ]);
   } catch (_) {
     extensionReady = false;
@@ -180,6 +180,9 @@ function setupOnboardingWizard() {
     try {
       try { await replit.fs.createDir("clients"); } catch (_) {}
       try { await replit.fs.createDir(folderName); } catch (_) {}
+      try { await replit.fs.createDir(folderName + "/docs"); } catch (_) {}
+      try { await replit.fs.createDir(folderName + "/assets"); } catch (_) {}
+      try { await replit.fs.createDir(folderName + "/deliverables"); } catch (_) {}
 
       const contractContent = generateContract(client);
       const contractPath = folderName + "/contract.md";
