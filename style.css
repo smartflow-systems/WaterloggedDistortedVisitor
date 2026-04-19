@@ -117,6 +117,16 @@ header {
   flex-direction: column;
 }
 
+/* PREVIEW NOTICE */
+.preview-notice {
+  background: rgba(240, 165, 0, 0.08);
+  border-bottom: 1px solid rgba(240, 165, 0, 0.3);
+  color: var(--warning);
+  font-size: 12px;
+  padding: 8px 20px;
+  line-height: 1.5;
+}
+
 /* TABS */
 .tab-nav {
   display: flex;

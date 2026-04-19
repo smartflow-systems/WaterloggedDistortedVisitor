@@ -1,14 +1,23 @@
 async function main() {
+  let extensionReady = true;
   try {
     await Promise.race([
       replit.init(),
       new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
     ]);
   } catch (_) {
+    extensionReady = false;
   }
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("main-content").style.display = "flex";
+
+  if (!extensionReady) {
+    const notice = document.createElement("div");
+    notice.className = "preview-notice";
+    notice.innerHTML = "⚠️ <strong>Preview mode</strong> — File generation requires this tool to be opened inside Replit Extension Devtools.";
+    document.querySelector(".tab-nav").after(notice);
+  }
 
   setupTabs();
   setupOnboardingWizard();
