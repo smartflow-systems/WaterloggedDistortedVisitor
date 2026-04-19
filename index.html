@@ -3,24 +3,197 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>replit</title>
+    <title>SFS Business Toolkit</title>
     <link href="style.css" rel="stylesheet" type="text/css" />
-    <!-- Loads the Extensions API -->
     <script src="https://unpkg.com/@replit/extensions@1.8.0/dist/index.global.js"></script>
   </head>
 
   <body>
-    <div id="container">
-      <h1>HTML/CSS/JS Extension Starter</h1>
-      <div id="loading">Loading...</div>
+    <div id="app">
+      <header>
+        <div class="header-logo">
+          <div class="logo-mark">SFS</div>
+          <div class="header-titles">
+            <h1>SmartFlow Systems</h1>
+            <p>Business Toolkit</p>
+          </div>
+        </div>
+      </header>
 
-      <div id="buttons" style="display: none">
-        <button id="create_test_dir" class="btn">mkdir test</button>
-        <button id="touch_text_file" class="btn">touch ./test-file.txt</button>
-        <button id="ls_a" class="btn">ls -a</button>
+      <div id="loading" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Loading SFS Toolkit...</p>
       </div>
 
-      <ul id="file_folder_list"></ul>
+      <div id="main-content" style="display:none;">
+        <nav class="tab-nav">
+          <button class="tab-btn active" data-tab="onboarding">
+            <span class="tab-icon">👤</span>
+            Client Onboarding
+          </button>
+          <button class="tab-btn" data-tab="launch-kit">
+            <span class="tab-icon">🚀</span>
+            Service Launch Kit
+          </button>
+        </nav>
+
+        <!-- CLIENT ONBOARDING WIZARD -->
+        <div id="tab-onboarding" class="tab-content active">
+          <div class="tool-header">
+            <h2>Client Onboarding Wizard</h2>
+            <p>Fill in the client details below. The wizard will automatically generate a project folder, contract template, and task checklist in your workspace.</p>
+          </div>
+
+          <form id="onboarding-form" class="toolkit-form">
+            <div class="form-section">
+              <h3>Client Information</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="client-name">Client Name *</label>
+                  <input type="text" id="client-name" placeholder="e.g. John Smith" required />
+                </div>
+                <div class="form-group">
+                  <label for="client-company">Company Name *</label>
+                  <input type="text" id="client-company" placeholder="e.g. Acme Corp" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="client-email">Email Address</label>
+                  <input type="email" id="client-email" placeholder="e.g. john@acme.com" />
+                </div>
+                <div class="form-group">
+                  <label for="client-phone">Phone Number</label>
+                  <input type="text" id="client-phone" placeholder="e.g. +1 555 0123" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Project Details</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="project-type">Project Type *</label>
+                  <select id="project-type" required>
+                    <option value="">Select type...</option>
+                    <option value="web-development">Web Development</option>
+                    <option value="mobile-app">Mobile App</option>
+                    <option value="automation">Automation / Systems</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="marketing">Digital Marketing</option>
+                    <option value="design">UI/UX Design</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="project-budget">Budget Range</label>
+                  <select id="project-budget">
+                    <option value="">Select range...</option>
+                    <option value="under-1k">Under $1,000</option>
+                    <option value="1k-5k">$1,000 – $5,000</option>
+                    <option value="5k-10k">$5,000 – $10,000</option>
+                    <option value="10k-25k">$10,000 – $25,000</option>
+                    <option value="25k-plus">$25,000+</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="project-start">Start Date</label>
+                  <input type="date" id="project-start" />
+                </div>
+                <div class="form-group">
+                  <label for="project-timeline">Estimated Duration</label>
+                  <select id="project-timeline">
+                    <option value="">Select duration...</option>
+                    <option value="1-2-weeks">1–2 Weeks</option>
+                    <option value="1-month">1 Month</option>
+                    <option value="2-3-months">2–3 Months</option>
+                    <option value="3-6-months">3–6 Months</option>
+                    <option value="6-months-plus">6+ Months</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="project-requirements">Project Requirements & Notes</label>
+                <textarea id="project-requirements" rows="4" placeholder="Describe what the client needs, key deliverables, special requirements, etc."></textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="onboarding-submit">
+                <span class="btn-icon">⚡</span>
+                Generate Onboarding Files
+              </button>
+            </div>
+          </form>
+
+          <div id="onboarding-result" class="result-panel" style="display:none;"></div>
+        </div>
+
+        <!-- SERVICE LAUNCH KIT GENERATOR -->
+        <div id="tab-launch-kit" class="tab-content">
+          <div class="tool-header">
+            <h2>Service Launch Kit Generator</h2>
+            <p>Enter your service details and get a complete marketing pack — email pitch, social media posts, and a website section — saved straight to your workspace.</p>
+          </div>
+
+          <form id="launch-form" class="toolkit-form">
+            <div class="form-section">
+              <h3>Service Details</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="service-name">Service Name *</label>
+                  <input type="text" id="service-name" placeholder="e.g. SmartFlow CRM Setup" required />
+                </div>
+                <div class="form-group">
+                  <label for="service-category">Category</label>
+                  <select id="service-category">
+                    <option value="">Select category...</option>
+                    <option value="automation">Automation</option>
+                    <option value="web">Web Development</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="design">Design</option>
+                    <option value="support">Support & Maintenance</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="service-description">Service Description *</label>
+                <textarea id="service-description" rows="3" placeholder="What does this service do? What problem does it solve?" required></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="service-audience">Target Audience *</label>
+                  <input type="text" id="service-audience" placeholder="e.g. Small business owners, e-commerce brands" required />
+                </div>
+                <div class="form-group">
+                  <label for="service-price">Starting Price</label>
+                  <input type="text" id="service-price" placeholder="e.g. From $499 / month" />
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="service-benefits">Key Benefits (one per line) *</label>
+                <textarea id="service-benefits" rows="4" placeholder="Saves 10+ hours per week&#10;No technical knowledge needed&#10;Done-for-you setup&#10;Ongoing support included" required></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label for="service-cta">Call to Action</label>
+                <input type="text" id="service-cta" placeholder="e.g. Book a free 30-min strategy call" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="launch-submit">
+                <span class="btn-icon">🚀</span>
+                Generate Launch Kit
+              </button>
+            </div>
+          </form>
+
+          <div id="launch-result" class="result-panel" style="display:none;"></div>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>

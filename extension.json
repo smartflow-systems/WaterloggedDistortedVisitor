@@ -1,9 +1,9 @@
 {
-  "name": "Javascript Extension Starter",
-  "description": "A starter template for a Replit Extension with Vanilla JavaScript",
+  "name": "SFS Business Toolkit",
+  "description": "SmartFlow Systems Business Toolkit — Client Onboarding Wizard and Service Launch Kit Generator",
   "tools": [
     {
-      "name": "Example Extension",
+      "name": "SFS Business Toolkit",
       "icon": "/replit.svg",
       "handler": "/"
     }
