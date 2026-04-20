@@ -1,3 +1,5 @@
+let _extensionReady = false;
+
 const SETTINGS_DEFAULTS = {
   businessName: "SmartFlow Systems",
   yourName: "",
@@ -45,6 +47,8 @@ async function main() {
     extensionReady = false;
   }
 
+  _extensionReady = extensionReady;
+
   await loadSettings(extensionReady);
 
   document.getElementById("loading").style.display = "none";
@@ -77,6 +81,10 @@ function setupTabs() {
 
       btn.classList.add("active");
       document.getElementById("tab-" + targetTab).classList.add("active");
+
+      if (targetTab === "outreach") {
+        loadProspectsLedger(_extensionReady);
+      }
     });
   });
 }
@@ -823,6 +831,11 @@ function setupOutreachCampaignBuilder(extensionReady) {
   const form = document.getElementById("outreach-form");
   const resultPanel = document.getElementById("outreach-result");
 
+  const refreshBtn = document.getElementById("ledger-refresh-btn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => loadProspectsLedger(extensionReady));
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -897,6 +910,7 @@ function setupOutreachCampaignBuilder(extensionReady) {
       try {
         await replit.messages.showConfirm("📣 Outreach campaign generated for " + prospect.name + "!");
       } catch (_) {}
+      loadProspectsLedger(extensionReady);
     } catch (err) {
       resultPanel.className = "error-panel";
       resultPanel.style.display = "block";
@@ -912,14 +926,15 @@ function setupOutreachCampaignBuilder(extensionReady) {
 }
 
 async function updateProspectsCSV(csvPath, prospect, folderPath, extensionReady) {
-  const csvHeader = "Date,Prospect Name,Company,Service Interest,Email,Campaign Folder\n";
-  const row = [
+  const csvHeader = "Date,Prospect Name,Company,Service Interest,Email,Campaign Folder,Status\n";
+  const newRow = [
     today(),
     '"' + prospect.name.replace(/"/g, '""') + '"',
     '"' + prospect.company.replace(/"/g, '""') + '"',
     '"' + prospect.service.replace(/"/g, '""') + '"',
     '"' + (prospect.email || "").replace(/"/g, '""') + '"',
     '"' + folderPath + '"',
+    "New",
   ].join(",") + "\n";
 
   if (!extensionReady) {
@@ -936,9 +951,176 @@ async function updateProspectsCSV(csvPath, prospect, folderPath, extensionReady)
 
   if (!existingContent.startsWith("Date,")) {
     existingContent = csvHeader + existingContent;
+  } else {
+    const firstLine = existingContent.split("\n")[0];
+    if (!firstLine.includes(",Status")) {
+      const lines = existingContent.split("\n");
+      lines[0] = lines[0] + ",Status";
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].trim() !== "") {
+          lines[i] = lines[i] + ",New";
+        }
+      }
+      existingContent = lines.join("\n");
+    }
   }
 
-  await replit.fs.writeFile(csvPath, existingContent + row);
+  await replit.fs.writeFile(csvPath, existingContent + newRow);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function parseCSVLine(line) {
+  const fields = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        fields.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+  }
+  fields.push(current);
+  return fields;
+}
+
+function parseProspectsCSV(content) {
+  const lines = content.split("\n").filter((l) => l.trim() !== "");
+  if (lines.length === 0) return { headers: [], rows: [] };
+  const headers = parseCSVLine(lines[0]);
+  const rows = lines.slice(1).map((line) => parseCSVLine(line));
+  return { headers, rows };
+}
+
+async function loadProspectsLedger(extensionReady) {
+  const wrap = document.getElementById("prospects-ledger-wrap");
+  if (!wrap) return;
+
+  if (!extensionReady) {
+    wrap.innerHTML = '<p class="ledger-empty">Open inside Replit Extension Devtools to manage prospect statuses.</p>';
+    return;
+  }
+
+  wrap.innerHTML = '<p class="ledger-empty">Loading...</p>';
+
+  try {
+    const result = await replit.fs.readFile("outreach-campaigns/prospects.csv", "utf8");
+    const { headers, rows } = parseProspectsCSV(result.content);
+    renderProspectsLedger(headers, rows, extensionReady);
+  } catch (_) {
+    wrap.innerHTML = '<p class="ledger-empty">No prospects yet. Generate your first campaign above to start your ledger.</p>';
+  }
+}
+
+function renderProspectsLedger(headers, rows, extensionReady) {
+  const wrap = document.getElementById("prospects-ledger-wrap");
+  if (!wrap) return;
+
+  if (rows.length === 0) {
+    wrap.innerHTML = '<p class="ledger-empty">No prospects yet. Generate your first campaign above to start your ledger.</p>';
+    return;
+  }
+
+  const statusOptions = ["New", "Contacted", "Interested", "Closed Won", "Closed Lost"];
+
+  let statusIndex = headers.indexOf("Status");
+  if (statusIndex < 0) {
+    headers.push("Status");
+    statusIndex = headers.length - 1;
+    rows.forEach((row) => { row[statusIndex] = "New"; });
+  }
+
+  const nameIndex = headers.indexOf("Prospect Name");
+  const companyIndex = headers.indexOf("Company");
+  const serviceIndex = headers.indexOf("Service Interest");
+  const dateIndex = headers.indexOf("Date");
+
+  let html = '<div class="ledger-table-wrap"><table class="ledger-table"><thead><tr>';
+  html += "<th>Date</th><th>Prospect</th><th>Company</th><th>Service</th><th>Status</th>";
+  html += "</tr></thead><tbody>";
+
+  rows.forEach((row, i) => {
+    const date = escapeHtml(dateIndex >= 0 ? (row[dateIndex] || "") : "");
+    const name = escapeHtml(nameIndex >= 0 ? (row[nameIndex] || "") : "");
+    const company = escapeHtml(companyIndex >= 0 ? (row[companyIndex] || "") : "");
+    const service = escapeHtml(serviceIndex >= 0 ? (row[serviceIndex] || "") : "");
+    const currentStatus = row[statusIndex] || "New";
+    const safeStatus = escapeHtml(currentStatus);
+
+    const statusClass = "status-badge status-" + currentStatus.toLowerCase().replace(/\s+/g, "-");
+
+    html += `<tr>
+      <td class="ledger-date">${date}</td>
+      <td class="ledger-name">${name}</td>
+      <td>${company}</td>
+      <td class="ledger-service">${service}</td>
+      <td>
+        <div class="ledger-status-cell">
+          <span class="${statusClass}">${safeStatus}</span>
+          <select class="ledger-status-select" data-row="${i}" aria-label="Update status for ${name}">
+            ${statusOptions.map((s) => `<option value="${escapeHtml(s)}"${s === currentStatus ? " selected" : ""}>${escapeHtml(s)}</option>`).join("")}
+          </select>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html += "</tbody></table></div>";
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll(".ledger-status-select").forEach((sel) => {
+    sel.addEventListener("change", async () => {
+      const rowIndex = parseInt(sel.dataset.row, 10);
+      const newStatus = sel.value;
+      rows[rowIndex][statusIndex] = newStatus;
+      await updateProspectStatus(headers, rows, extensionReady);
+      renderProspectsLedger(headers, rows, extensionReady);
+    });
+  });
+}
+
+async function updateProspectStatus(headers, rows, extensionReady) {
+  if (!extensionReady) return;
+
+  const csvHeader = headers.join(",") + "\n";
+  const csvRows = rows.map((row) =>
+    row.map((field) => {
+      if (field.includes(",") || field.includes('"') || field.includes("\n")) {
+        return '"' + field.replace(/"/g, '""') + '"';
+      }
+      return field;
+    }).join(",")
+  ).join("\n");
+
+  const content = csvHeader + csvRows + (rows.length > 0 ? "\n" : "");
+  try {
+    await replit.fs.writeFile("outreach-campaigns/prospects.csv", content);
+  } catch (err) {
+    console.error("Failed to update prospects.csv:", err);
+  }
 }
 
 function generateOutreachEmail1(p) {

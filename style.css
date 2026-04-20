@@ -687,6 +687,169 @@ input[type="date"] {
 }
 
 /* ===========================
+   PROSPECTS LEDGER
+   =========================== */
+
+.prospects-ledger-section {
+  margin-top: 24px;
+}
+
+.ledger-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ledger-header h3 {
+  margin-bottom: 2px;
+}
+
+.ledger-subtext {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.ledger-empty {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.ledger-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ledger-table thead th {
+  background: hsla(45, 95%, 65%, 0.07);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.ledger-table tbody tr {
+  border-bottom: 1px solid hsla(45, 30%, 22%, 0.5);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+.ledger-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ledger-table tbody tr:hover {
+  background: hsla(45, 95%, 65%, 0.04);
+}
+
+.ledger-table td {
+  padding: 9px 12px;
+  vertical-align: middle;
+  color: var(--foreground);
+}
+
+.ledger-date {
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.ledger-name {
+  font-weight: 600;
+}
+
+.ledger-service {
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+
+.ledger-status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-new {
+  background: hsla(45, 95%, 65%, 0.12);
+  color: var(--sf-gold);
+  border: 1px solid hsla(45, 95%, 65%, 0.25);
+}
+
+.status-contacted {
+  background: hsla(210, 80%, 60%, 0.12);
+  color: hsl(210, 80%, 70%);
+  border: 1px solid hsla(210, 80%, 60%, 0.25);
+}
+
+.status-interested {
+  background: hsla(270, 70%, 65%, 0.12);
+  color: hsl(270, 70%, 75%);
+  border: 1px solid hsla(270, 70%, 65%, 0.25);
+}
+
+.status-closed-won {
+  background: hsla(142, 70%, 45%, 0.12);
+  color: var(--success);
+  border: 1px solid hsla(142, 70%, 45%, 0.25);
+}
+
+.status-closed-lost {
+  background: hsla(0, 72%, 55%, 0.12);
+  color: var(--error);
+  border: 1px solid hsla(0, 72%, 55%, 0.25);
+}
+
+.ledger-status-select {
+  background: hsla(0, 0%, 5%, 0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 3px 24px 3px 7px;
+  width: auto;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a08040' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.ledger-status-select:focus {
+  outline: none;
+  border-color: var(--sf-gold);
+  box-shadow: 0 0 0 2px hsla(45, 95%, 65%, 0.12);
+}
+
+/* ===========================
    SCROLLBAR
    =========================== */
 
