@@ -1,3 +1,39 @@
+const SETTINGS_DEFAULTS = {
+  businessName: "SmartFlow Systems",
+  yourName: "",
+  email: "",
+  phone: "",
+  website: "",
+  logoUrl: "",
+  calendarLink: "",
+};
+
+let sfsSettings = Object.assign({}, SETTINGS_DEFAULTS);
+
+async function loadSettings(extensionReady) {
+  try {
+    if (extensionReady) {
+      const result = await replit.fs.readFile("settings/settings.json", "utf8");
+      sfsSettings = Object.assign({}, SETTINGS_DEFAULTS, JSON.parse(result.content));
+      return;
+    }
+  } catch (_) {}
+  try {
+    const stored = localStorage.getItem("sfs_settings");
+    if (stored) sfsSettings = Object.assign({}, SETTINGS_DEFAULTS, JSON.parse(stored));
+  } catch (_) {}
+}
+
+async function saveSettings(settings, extensionReady) {
+  sfsSettings = Object.assign({}, SETTINGS_DEFAULTS, settings);
+  const json = JSON.stringify(sfsSettings, null, 2);
+  try { localStorage.setItem("sfs_settings", json); } catch (_) {}
+  if (extensionReady) {
+    try { await replit.fs.createDir("settings"); } catch (_) {}
+    await replit.fs.writeFile("settings/settings.json", json);
+  }
+}
+
 async function main() {
   let extensionReady = true;
   try {
@@ -8,6 +44,8 @@ async function main() {
   } catch (_) {
     extensionReady = false;
   }
+
+  await loadSettings(extensionReady);
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("main-content").style.display = "flex";
@@ -22,6 +60,7 @@ async function main() {
   setupTabs();
   setupOnboardingWizard();
   setupLaunchKitGenerator();
+  setupSettingsPanel(extensionReady);
 }
 
 function setupTabs() {
@@ -239,18 +278,24 @@ function generateContract(c) {
     "6-months-plus": "6+ Months",
   };
 
+  const bizName = sfsSettings.businessName || "SmartFlow Systems";
+  const bizContact = sfsSettings.yourName ? ` — ${sfsSettings.yourName}` : "";
+  const bizEmail = sfsSettings.email ? `\n- **Email:** ${sfsSettings.email}` : "";
+  const bizPhone = sfsSettings.phone ? `\n- **Phone:** ${sfsSettings.phone}` : "";
+  const bizWebsite = sfsSettings.website ? `\n- **Website:** ${sfsSettings.website}` : "";
+
   return `# SERVICE AGREEMENT
-## SmartFlow Systems (SFS) × ${c.company}
+## ${bizName} × ${c.company}
 
 **Date:** ${today()}
-**Prepared by:** SmartFlow Systems
+**Prepared by:** ${bizName}
 
 ---
 
 ## 1. PARTIES
 
 **Service Provider:**
-SmartFlow Systems (SFS)
+${bizName}${bizContact}${bizEmail}${bizPhone}${bizWebsite}
 
 **Client:**
 - **Name:** ${c.name}
@@ -294,7 +339,7 @@ The following deliverables will be agreed upon and documented in a separate proj
 
 ## 5. INTELLECTUAL PROPERTY
 
-All work produced under this agreement remains the property of the Client upon receipt of full payment. SmartFlow Systems retains the right to showcase completed work in its portfolio unless otherwise agreed in writing.
+All work produced under this agreement remains the property of the Client upon receipt of full payment. ${bizName} retains the right to showcase completed work in its portfolio unless otherwise agreed in writing.
 
 ---
 
@@ -312,7 +357,7 @@ Either party may terminate this agreement with 14 days written notice. Any work 
 
 ## 8. SIGNATURES
 
-**SmartFlow Systems**
+**${bizName}**
 Signature: ______________________ Date: ______________
 
 **${c.name} (${c.company})**
@@ -486,8 +531,69 @@ function setupLaunchKitGenerator() {
   });
 }
 
+function setupSettingsPanel(extensionReady) {
+  const form = document.getElementById("settings-form");
+  const resultPanel = document.getElementById("settings-result");
+
+  document.getElementById("settings-business-name").value = sfsSettings.businessName || "";
+  document.getElementById("settings-your-name").value = sfsSettings.yourName || "";
+  document.getElementById("settings-email").value = sfsSettings.email || "";
+  document.getElementById("settings-phone").value = sfsSettings.phone || "";
+  document.getElementById("settings-website").value = sfsSettings.website || "";
+  document.getElementById("settings-calendar").value = sfsSettings.calendarLink || "";
+  document.getElementById("settings-logo").value = sfsSettings.logoUrl || "";
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("settings-submit");
+    submitBtn.disabled = true;
+    submitBtn.classList.add("btn-loading");
+    submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Saving...';
+
+    const settings = {
+      businessName: document.getElementById("settings-business-name").value.trim() || SETTINGS_DEFAULTS.businessName,
+      yourName: document.getElementById("settings-your-name").value.trim(),
+      email: document.getElementById("settings-email").value.trim(),
+      phone: document.getElementById("settings-phone").value.trim(),
+      website: document.getElementById("settings-website").value.trim(),
+      calendarLink: document.getElementById("settings-calendar").value.trim(),
+      logoUrl: document.getElementById("settings-logo").value.trim(),
+    };
+
+    try {
+      await saveSettings(settings, extensionReady);
+      resultPanel.className = "result-panel";
+      resultPanel.style.display = "block";
+      resultPanel.innerHTML = `
+        <div class="result-header">
+          <span class="result-icon">✅</span>
+          <h3>Settings saved!</h3>
+        </div>
+        <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">Your business details will now be pre-filled in all generated documents.</p>
+      `;
+    } catch (err) {
+      resultPanel.className = "error-panel";
+      resultPanel.style.display = "block";
+      resultPanel.innerHTML = "⚠️ Could not save settings to file. Settings have been saved locally for this session. (" + err.message + ")";
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("btn-loading");
+    submitBtn.innerHTML = '<span class="btn-icon">💾</span> Save Settings';
+
+    resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
 function generateEmailPitch(s) {
   const bulletList = s.benefits.map((b) => `- ${b}`).join("\n");
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const senderPhone = sfsSettings.phone || "[Your Phone]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
   return `# Email Pitch — ${s.name}
 
 **Generated:** ${today()}
@@ -521,9 +627,9 @@ ${s.price ? "**Pricing:** " + s.price : ""}
 If this sounds like something you've been looking for, I'd love to chat. ${s.cta}.
 
 Best,
-[Your Name]
-SmartFlow Systems
-[Your Email] | [Your Phone]
+${senderName}
+${senderBusiness}
+${senderEmail} | ${senderPhone}
 
 ---
 
@@ -539,10 +645,10 @@ I know your inbox is busy, so I'll keep this short — if ${s.description.toLowe
 
 Would a quick 15-minute call this week work for you?
 
-[Your Calendar Link]
+${calendarLink}
 
 Best,
-[Your Name]
+${senderName}
 
 ---
 *Generated by SFS Business Toolkit on ${today()}.*
@@ -552,6 +658,8 @@ Best,
 function generateSocialPosts(s) {
   const benefitHighlight = s.benefits[0] || "saving you time and money";
   const bulletList = s.benefits.map((b) => `• ${b}`).join("\n");
+  const bizName = sfsSettings.businessName || "SmartFlow Systems";
+  const bizTag = bizName.replace(/\s+/g, "");
 
   return `# Social Media Posts — ${s.name}
 
@@ -573,7 +681,7 @@ ${s.price ? s.price + " | " : ""}${s.cta}.
 
 Drop a comment or DM us to learn more. 👇
 
-#SmartFlowSystems #${s.category || "Business"} #${s.audience.split(" ")[0]}Solutions
+#${bizTag} #${s.category || "Business"} #${s.audience.split(" ")[0]}Solutions
 
 ---
 
@@ -624,7 +732,7 @@ ${s.price ? "💰 " + s.price : ""}
 .
 .
 .
-#SmartFlowSystems #SmallBusiness #BusinessGrowth #${s.category || "Entrepreneur"} #Productivity #BusinessTips
+#${bizTag} #SmallBusiness #BusinessGrowth #${s.category || "Entrepreneur"} #Productivity #BusinessTips
 
 ---
 *Generated by SFS Business Toolkit on ${today()}.*
@@ -642,6 +750,11 @@ function generateWebsiteSection(s) {
     )
     .join("");
 
+  const bizName = sfsSettings.businessName || "SmartFlow Systems";
+  const bizWebsite = sfsSettings.website || "#contact";
+  const bizEmail = sfsSettings.email;
+  const ctaHref = sfsSettings.calendarLink || bizWebsite;
+
   return `<!-- ${s.name} — Website Section -->
 <!-- Generated by SFS Business Toolkit on ${today()} -->
 <!-- Paste this into your website HTML. Styles are included inline. -->
@@ -650,8 +763,9 @@ function generateWebsiteSection(s) {
   <div style="max-width:760px;margin:0 auto;">
 
     <div style="text-align:center;margin-bottom:40px;">
+      ${sfsSettings.logoUrl ? `<img src="${sfsSettings.logoUrl}" alt="${bizName} logo" style="height:48px;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;" />` : ""}
       <span style="background:linear-gradient(135deg,#4a9eff,#f0a500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-        SmartFlow Systems
+        ${bizName}
       </span>
       <h2 style="font-size:36px;font-weight:800;margin:12px 0;line-height:1.2;">${s.name}</h2>
       <p style="font-size:18px;color:#8b949e;line-height:1.6;max-width:560px;margin:0 auto;">
@@ -694,7 +808,7 @@ function generateWebsiteSection(s) {
 
     <div style="text-align:center;">
       ${s.price ? '<p style="font-size:15px;color:#8b949e;margin-bottom:16px;">' + s.price + '</p>' : ""}
-      <a href="#contact" style="display:inline-block;background:linear-gradient(135deg,#4a9eff,#2176c7);color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">
+      <a href="${ctaHref}" style="display:inline-block;background:linear-gradient(135deg,#4a9eff,#2176c7);color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">
         ${s.cta}
       </a>
     </div>

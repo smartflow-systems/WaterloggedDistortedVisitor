@@ -36,6 +36,10 @@
             <span class="tab-icon">🚀</span>
             Service Launch Kit
           </button>
+          <button class="tab-btn" data-tab="settings">
+            <span class="tab-icon">⚙️</span>
+            Settings
+          </button>
         </nav>
 
         <!-- CLIENT ONBOARDING WIZARD -->
@@ -252,6 +256,63 @@
           </form>
 
           <div id="launch-result" class="result-panel" style="display:none;"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="tab-settings" class="tab-content">
+          <div class="tool-header">
+            <h2>Business Settings</h2>
+            <p>Enter your SFS business details once and they will be pre-filled in every generated document automatically.</p>
+          </div>
+
+          <form id="settings-form" class="toolkit-form">
+            <div class="form-section">
+              <h3>Your Business</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="settings-business-name">Business Name</label>
+                  <input type="text" id="settings-business-name" placeholder="e.g. SmartFlow Systems" />
+                </div>
+                <div class="form-group">
+                  <label for="settings-your-name">Your Name</label>
+                  <input type="text" id="settings-your-name" placeholder="e.g. Jane Smith" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="settings-email">Email Address</label>
+                  <input type="email" id="settings-email" placeholder="e.g. hello@smartflowsystems.com" />
+                </div>
+                <div class="form-group">
+                  <label for="settings-phone">Phone Number</label>
+                  <input type="text" id="settings-phone" placeholder="e.g. +1 555 0100" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="settings-website">Website</label>
+                  <input type="url" id="settings-website" placeholder="e.g. https://smartflowsystems.com" />
+                </div>
+                <div class="form-group">
+                  <label for="settings-calendar">Calendar / Booking Link</label>
+                  <input type="url" id="settings-calendar" placeholder="e.g. https://calendly.com/yourname" />
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="settings-logo">Logo URL</label>
+                <input type="url" id="settings-logo" placeholder="e.g. https://yoursite.com/logo.png" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="settings-submit">
+                <span class="btn-icon">💾</span>
+                Save Settings
+              </button>
+            </div>
+          </form>
+
+          <div id="settings-result" class="result-panel" style="display:none;"></div>
         </div>
       </div>
     </div>
