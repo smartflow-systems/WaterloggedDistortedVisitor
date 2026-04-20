@@ -227,17 +227,17 @@ function setupOnboardingWizard() {
       const contractContent = generateContract(client);
       const contractPath = folderName + "/contract.md";
       await replit.fs.writeFile(contractPath, contractContent);
-      createdFiles.push({ icon: "📄", label: "Contract template", path: contractPath });
+      createdFiles.push({ icon: "📄", label: "Contract template", path: contractPath, content: contractContent });
 
       const checklistContent = generateChecklist(client);
       const checklistPath = folderName + "/task-checklist.md";
       await replit.fs.writeFile(checklistPath, checklistContent);
-      createdFiles.push({ icon: "✅", label: "Task checklist", path: checklistPath });
+      createdFiles.push({ icon: "✅", label: "Task checklist", path: checklistPath, content: checklistContent });
 
       const briefContent = generateClientBrief(client);
       const briefPath = folderName + "/client-brief.md";
       await replit.fs.writeFile(briefPath, briefContent);
-      createdFiles.push({ icon: "📋", label: "Client brief", path: briefPath });
+      createdFiles.push({ icon: "📋", label: "Client brief", path: briefPath, content: briefContent });
 
       resultPanel.className = "result-panel";
       resultPanel.style.display = "block";
@@ -496,17 +496,17 @@ function setupLaunchKitGenerator() {
       const emailContent = generateEmailPitch(service);
       const emailPath = folderName + "/email-pitch.md";
       await replit.fs.writeFile(emailPath, emailContent);
-      createdFiles.push({ icon: "📧", label: "Email pitch", path: emailPath });
+      createdFiles.push({ icon: "📧", label: "Email pitch", path: emailPath, content: emailContent });
 
       const socialContent = generateSocialPosts(service);
       const socialPath = folderName + "/social-media-posts.md";
       await replit.fs.writeFile(socialPath, socialContent);
-      createdFiles.push({ icon: "📱", label: "Social media posts", path: socialPath });
+      createdFiles.push({ icon: "📱", label: "Social media posts", path: socialPath, content: socialContent });
 
       const websiteContent = generateWebsiteSection(service);
       const websitePath = folderName + "/website-section.html";
       await replit.fs.writeFile(websitePath, websiteContent);
-      createdFiles.push({ icon: "🌐", label: "Website section (HTML)", path: websitePath });
+      createdFiles.push({ icon: "🌐", label: "Website section (HTML)", path: websitePath, content: websiteContent });
 
       resultPanel.className = "result-panel";
       resultPanel.style.display = "block";
@@ -866,22 +866,22 @@ function setupOutreachCampaignBuilder(extensionReady) {
       const email1 = generateOutreachEmail1(prospect);
       const email1Path = folderName + "/email-1-intro.md";
       await replit.fs.writeFile(email1Path, email1);
-      createdFiles.push({ icon: "📧", label: "Email 1 — Introduction", path: email1Path });
+      createdFiles.push({ icon: "📧", label: "Email 1 — Introduction", path: email1Path, content: email1 });
 
       const email2 = generateOutreachEmail2(prospect);
       const email2Path = folderName + "/email-2-followup.md";
       await replit.fs.writeFile(email2Path, email2);
-      createdFiles.push({ icon: "📧", label: "Email 2 — Follow-Up", path: email2Path });
+      createdFiles.push({ icon: "📧", label: "Email 2 — Follow-Up", path: email2Path, content: email2 });
 
       const email3 = generateOutreachEmail3(prospect);
       const email3Path = folderName + "/email-3-final.md";
       await replit.fs.writeFile(email3Path, email3);
-      createdFiles.push({ icon: "📧", label: "Email 3 — Final Check-In", path: email3Path });
+      createdFiles.push({ icon: "📧", label: "Email 3 — Final Check-In", path: email3Path, content: email3 });
 
       const pitchDeck = generatePitchDeckOutline(prospect);
       const pitchPath = folderName + "/pitch-deck-outline.md";
       await replit.fs.writeFile(pitchPath, pitchDeck);
-      createdFiles.push({ icon: "🖼️", label: "Pitch Deck Outline", path: pitchPath });
+      createdFiles.push({ icon: "🖼️", label: "Pitch Deck Outline", path: pitchPath, content: pitchDeck });
 
       const csvPath = "outreach-campaigns/prospects.csv";
       await updateProspectsCSV(csvPath, prospect, folderName, extensionReady);
@@ -1178,18 +1178,80 @@ Keep this simple — 3 to 5 steps max.
 `;
 }
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function copyFileContent(btn) {
+  const content = btn.dataset.content;
+  navigator.clipboard.writeText(content).then(() => {
+    const original = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.classList.add("btn-copy-success");
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove("btn-copy-success");
+    }, 1800);
+  }).catch(() => {
+    const ta = document.createElement("textarea");
+    ta.value = content;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    btn.textContent = "Copied!";
+    btn.classList.add("btn-copy-success");
+    setTimeout(() => {
+      btn.textContent = "Copy";
+      btn.classList.remove("btn-copy-success");
+    }, 1800);
+  });
+}
+
+function toggleFilePreview(btn) {
+  const fileEl = btn.closest(".result-file");
+  const preview = fileEl.querySelector(".file-preview-body");
+  const isOpen = !preview.hidden;
+  preview.hidden = isOpen;
+  btn.textContent = isOpen ? "▼ Preview" : "▲ Hide";
+  btn.classList.toggle("active", !isOpen);
+}
+
 function buildResultHTML(title, message, files) {
   const fileItems = files
-    .map(
-      (f) => `
+    .map((f) => {
+      const hasContent = f.content != null;
+      const dataAttr = hasContent
+        ? ` data-content="${escapeHtml(f.content)}"`
+        : "";
+      const actions = hasContent
+        ? `<div class="result-file-actions">
+            <button class="btn-copy" onclick="copyFileContent(this)"${dataAttr}>Copy</button>
+            <button class="btn-preview-toggle" onclick="toggleFilePreview(this)">▼ Preview</button>
+          </div>`
+        : "";
+      const preview = hasContent
+        ? `<div class="file-preview-body" hidden><pre class="file-preview-pre"><code>${escapeHtml(f.content)}</code></pre></div>`
+        : "";
+      return `
     <div class="result-file">
-      <span class="result-file-icon">${f.icon}</span>
-      <div>
-        <div style="margin-bottom:2px;">${f.label}</div>
-        <div class="result-file-path">${f.path}</div>
+      <div class="result-file-header">
+        <span class="result-file-icon">${f.icon}</span>
+        <div class="result-file-info">
+          <div style="margin-bottom:2px;">${f.label}</div>
+          <div class="result-file-path">${f.path}</div>
+        </div>
+        ${actions}
       </div>
-    </div>`
-    )
+      ${preview}
+    </div>`;
+    })
     .join("");
 
   return `
