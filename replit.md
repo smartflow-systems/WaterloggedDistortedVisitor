@@ -1,29 +1,56 @@
-# SFS Business Toolkit — Replit Extension
+# SFS Business Toolkit — SaaS Web App
 
 ## Overview
-A Replit Extension for SmartFlow Systems (SFS) that provides three powerful business tools:
+A full-stack SaaS web application for SmartFlow Systems (SFS) that provides three powerful business tools. Users sign up with email/password, get 5 free document generations per month, and can upgrade to Pro (via Stripe) for unlimited access.
 
-1. **Client Onboarding Wizard** — Collects client details and auto-generates a project folder, contract template, task checklist, and client brief in the workspace.
-2. **Service Launch Kit Generator** — Takes service details and generates a marketing email pitch, social media posts (LinkedIn, Twitter, Instagram), and a ready-to-use website section (HTML).
-3. **Outreach Campaign Builder** — Takes prospect details and generates a 3-email follow-up sequence, a pitch deck outline, and updates a running prospects CSV ledger.
+## Tools
+1. **Client Onboarding Wizard** — 3-step wizard generating a contract, task checklist, and client brief
+2. **Service Launch Kit Generator** — Generates email pitch, social media posts (LinkedIn/Twitter/Instagram), and website HTML section
+3. **Outreach Campaign Builder** — Generates 3-email follow-up sequence and pitch deck outline for a prospect
+4. **Business Settings** — One-time setup of business details pre-filled into all generated documents
+
+## Architecture
+- **Backend**: Node.js + Express (`server.js`)
+- **Database**: PostgreSQL (Replit built-in) via `pg` driver — tables managed in `db.js`
+- **Auth**: bcrypt password hashing + express-session + connect-pg-simple (sessions in DB)
+- **Payments**: Stripe (freemium model — 5 free generations/month, Pro = unlimited)
+- **Frontend**: Vanilla HTML/CSS/JS served from `public/` directory
+- **Content Generators**: All generation logic in `generators.js` (server-side)
 
 ## Project Structure
-- `index.html` — Full SFS-branded UI with tab navigation for all three tools
-- `script.js` — All logic: tab switching, form handling, file generation via Replit FS API
-- `style.css` — Professional dark-themed SFS styling
-- `extension.json` — Extension metadata (name: "SFS Business Toolkit")
-- `background.html` / `background.js` — Background extension scripts
+```
+server.js          — Express server (auth, API routes, Stripe)
+db.js              — PostgreSQL connection + all DB queries
+generators.js      — All document/content generator functions
+public/
+  dashboard.html   — Main app UI (auth-protected, API-driven)
+  login.html       — Login page
+  signup.html      — Signup page
+  upgrade-success.html — Post-Stripe-payment success page
+  style.css        — SFS gold/marble theme
+  sfs-circuit-flow.js — Animated circuit background
+scripts/
+  post-merge.sh    — npm install (runs after task merges)
+```
 
 ## Running the Project
-Served via `npx serve -l 5000` (Workflow: "Serve Extension").
+Workflow: `Serve Extension` → runs `node server.js` on port 5000
 
-**Note:** The `replit.fs` file-writing features only work when the extension is loaded inside the Replit Extension Devtools panel. The UI loads and displays correctly in the preview at all times.
+## Environment Variables
+- `DATABASE_URL` — PostgreSQL connection string (auto-provisioned)
+- `SESSION_SECRET` — Secret for session signing (falls back to hardcoded default in dev)
+- `STRIPE_SECRET_KEY` — Stripe secret key (optional — payments disabled if not set)
+- `STRIPE_PRICE_ID` — Stripe price ID for the Pro subscription
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret
 
-## How to Use
-1. **In Replit**: Open Extension Devtools → Tools → Open
-2. Fill in the relevant tool's form and click Generate — files are created directly in your workspace
+## Freemium Model
+- **Free**: 5 document generations per month (total across all tools)
+- **Pro**: Unlimited generations — users upgrade via Stripe checkout
+- Usage tracked in `usage` table per user/tool/month
 
-## Output Files
-- **Client Onboarding** → `clients/<company-name>/contract.md`, `task-checklist.md`, `client-brief.md`
-- **Service Launch Kit** → `launch-kits/<service-name>/email-pitch.md`, `social-media-posts.md`, `website-section.html`
-- **Outreach Campaigns** → `outreach-campaigns/<prospect-name>/email-1-intro.md`, `email-2-followup.md`, `email-3-final.md`, `pitch-deck-outline.md`; `outreach-campaigns/prospects.csv` (appended each run)
+## DB Tables
+- `users` — id, name, email, password_hash, plan, stripe_customer_id, stripe_subscription_id
+- `user_settings` — user_id (FK), business_name, your_name, email, phone, website, logo_url, calendar_link
+- `usage` — user_id, tool, month_year, count (unique per user/tool/month)
+- `generated_files` — user_id, tool, label, file_name, content (history)
+- `session` — managed by connect-pg-simple

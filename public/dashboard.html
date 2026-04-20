@@ -1,0 +1,688 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SFS Business Toolkit</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .header-right {
+      display: flex; align-items: center; gap: 12px; margin-left: auto;
+    }
+    .usage-pill {
+      background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px;
+      color: hsl(45,90%,65%); font-weight: 600; white-space: nowrap;
+    }
+    .usage-pill.limit { background:rgba(248,81,73,0.1); border-color:rgba(248,81,73,0.3); color:#f85149; }
+    .upgrade-btn {
+      background: linear-gradient(135deg, hsl(45,95%,60%), hsl(35,85%,45%));
+      color: #0a0a0f; border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 12px; font-weight: 800;
+      cursor: pointer; white-space: nowrap; transition: opacity .2s;
+    }
+    .upgrade-btn:hover { opacity: .85; }
+    .user-menu {
+      position: relative;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, hsl(45,95%,55%), hsl(35,90%,40%));
+      color: #0a0a0f; display:flex; align-items:center; justify-content:center;
+      font-weight: 800; font-size: 13px; cursor: pointer;
+      border: 2px solid rgba(212,175,55,0.4);
+    }
+    .user-dropdown {
+      display: none; position: absolute; right: 0; top: calc(100% + 8px);
+      background: rgba(15,15,25,0.97); border: 1px solid rgba(212,175,55,0.25);
+      border-radius: 12px; min-width: 180px; padding: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 100;
+    }
+    .user-dropdown.open { display: block; }
+    .user-dropdown-name { padding: 8px 12px 4px; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .user-dropdown-email { padding: 0 12px 8px; font-size: 11px; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom:4px; }
+    .user-dropdown-plan { padding:6px 12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:hsl(45,90%,65%); }
+    .logout-btn {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 9px 12px; font-size: 13px; color: var(--text-secondary);
+      cursor: pointer; border-radius: 7px; transition: background .15s;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .upgrade-wall {
+      background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.25);
+      border-radius: 14px; padding: 28px; text-align: center; margin-top: 20px;
+    }
+    .upgrade-wall h3 { color: hsl(45,90%,65%); margin: 0 0 8px; font-size: 18px; }
+    .upgrade-wall p { color: var(--text-secondary); font-size: 13px; margin: 0 0 20px; line-height: 1.6; }
+    .upgrade-wall-btn {
+      background: linear-gradient(135deg, hsl(45,95%,60%), hsl(35,85%,45%));
+      color: #0a0a0f; border: none; border-radius: 10px;
+      padding: 12px 28px; font-size: 14px; font-weight: 800;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .upgrade-wall-btn:hover { opacity:.85; }
+    .upgrade-wall-btn:disabled { opacity:.5; cursor:not-allowed; }
+  </style>
+</head>
+<body>
+  <canvas id="sfs-circuit"></canvas>
+  <div id="app">
+    <header>
+      <div class="header-logo">
+        <div class="logo-mark">SFS</div>
+        <div class="header-titles">
+          <h1>SmartFlow Systems</h1>
+          <p>Business Toolkit</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="usage-pill" id="usage-pill" style="display:none;"></span>
+        <button class="upgrade-btn" id="upgrade-btn" style="display:none;" onclick="startUpgrade()">⚡ Upgrade to Pro</button>
+        <div class="user-menu">
+          <div class="user-avatar" id="user-avatar" onclick="toggleDropdown()">?</div>
+          <div class="user-dropdown" id="user-dropdown">
+            <div class="user-dropdown-name" id="dd-name">—</div>
+            <div class="user-dropdown-email" id="dd-email">—</div>
+            <div class="user-dropdown-plan" id="dd-plan">Free Plan</div>
+            <button class="logout-btn" onclick="logout()">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div id="loading" class="loading-screen">
+      <div class="spinner"></div>
+      <p>Loading SFS Toolkit...</p>
+    </div>
+
+    <div id="main-content" style="display:none;">
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="onboarding"><span class="tab-icon">👤</span>Client Onboarding</button>
+        <button class="tab-btn" data-tab="launch-kit"><span class="tab-icon">🚀</span>Service Launch Kit</button>
+        <button class="tab-btn" data-tab="outreach"><span class="tab-icon">📣</span>Outreach Campaigns</button>
+        <button class="tab-btn" data-tab="settings"><span class="tab-icon">⚙️</span>Settings</button>
+      </nav>
+
+      <!-- CLIENT ONBOARDING WIZARD -->
+      <div id="tab-onboarding" class="tab-content active">
+        <div class="tool-header">
+          <h2>Client Onboarding Wizard</h2>
+          <p>Complete the 3 steps below to automatically generate a contract, task checklist, and client brief for your new client.</p>
+        </div>
+        <div class="step-indicator">
+          <div class="step active" data-step="1"><div class="step-num">1</div><div class="step-label">Client Info</div></div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">Project Details</div></div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">Review &amp; Generate</div></div>
+        </div>
+        <form id="onboarding-form" class="toolkit-form">
+          <div class="wizard-step" id="wizard-step-1">
+            <div class="form-section">
+              <h3>Step 1 — Client Information</h3>
+              <div class="form-row">
+                <div class="form-group"><label for="client-name">Client Name *</label><input type="text" id="client-name" placeholder="e.g. John Smith" /></div>
+                <div class="form-group"><label for="client-company">Company Name *</label><input type="text" id="client-company" placeholder="e.g. Acme Corp" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="client-email">Email Address</label><input type="email" id="client-email" placeholder="e.g. john@acme.com" /></div>
+                <div class="form-group"><label for="client-phone">Phone Number</label><input type="text" id="client-phone" placeholder="e.g. +1 555 0123" /></div>
+              </div>
+            </div>
+            <div class="form-actions"><button type="button" class="btn btn-primary" id="step1-next">Next: Project Details →</button></div>
+          </div>
+          <div class="wizard-step" id="wizard-step-2" style="display:none;">
+            <div class="form-section">
+              <h3>Step 2 — Project Details</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="project-type">Project Type *</label>
+                  <select id="project-type">
+                    <option value="">Select type...</option>
+                    <option value="web-development">Web Development</option>
+                    <option value="mobile-app">Mobile App</option>
+                    <option value="automation">Automation / Systems</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="marketing">Digital Marketing</option>
+                    <option value="design">UI/UX Design</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="project-budget">Budget Range</label>
+                  <select id="project-budget">
+                    <option value="">Select range...</option>
+                    <option value="under-1k">Under $1,000</option>
+                    <option value="1k-5k">$1,000 – $5,000</option>
+                    <option value="5k-10k">$5,000 – $10,000</option>
+                    <option value="10k-25k">$10,000 – $25,000</option>
+                    <option value="25k-plus">$25,000+</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="project-start">Start Date</label><input type="date" id="project-start" /></div>
+                <div class="form-group">
+                  <label for="project-timeline">Estimated Duration</label>
+                  <select id="project-timeline">
+                    <option value="">Select duration...</option>
+                    <option value="1-2-weeks">1–2 Weeks</option>
+                    <option value="1-month">1 Month</option>
+                    <option value="2-3-months">2–3 Months</option>
+                    <option value="3-6-months">3–6 Months</option>
+                    <option value="6-months-plus">6+ Months</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group full-width"><label for="project-requirements">Project Requirements &amp; Notes</label><textarea id="project-requirements" rows="4" placeholder="Describe what the client needs, key deliverables, special requirements, etc."></textarea></div>
+            </div>
+            <div class="form-actions step-actions">
+              <button type="button" class="btn btn-secondary" id="step2-back">← Back</button>
+              <button type="button" class="btn btn-primary" id="step2-next">Next: Review →</button>
+            </div>
+          </div>
+          <div class="wizard-step" id="wizard-step-3" style="display:none;">
+            <div class="form-section">
+              <h3>Step 3 — Review &amp; Generate</h3>
+              <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">Check the details below, then click Generate to create your onboarding documents.</p>
+              <div id="review-summary" class="review-summary"></div>
+            </div>
+            <div class="form-actions step-actions">
+              <button type="button" class="btn btn-secondary" id="step3-back">← Back</button>
+              <button type="submit" class="btn btn-primary" id="onboarding-submit"><span class="btn-icon">⚡</span>Generate Onboarding Files</button>
+            </div>
+          </div>
+        </form>
+        <div id="onboarding-result" class="result-panel" style="display:none;"></div>
+      </div>
+
+      <!-- SERVICE LAUNCH KIT -->
+      <div id="tab-launch-kit" class="tab-content">
+        <div class="tool-header">
+          <h2>Service Launch Kit Generator</h2>
+          <p>Enter your service details and get a complete marketing pack — email pitch, social media posts, and a website section.</p>
+        </div>
+        <form id="launch-form" class="toolkit-form">
+          <div class="form-section">
+            <h3>Service Details</h3>
+            <div class="form-row">
+              <div class="form-group"><label for="service-name">Service Name *</label><input type="text" id="service-name" placeholder="e.g. SmartFlow CRM Setup" required /></div>
+              <div class="form-group">
+                <label for="service-category">Category</label>
+                <select id="service-category">
+                  <option value="">Select category...</option>
+                  <option value="automation">Automation</option>
+                  <option value="web">Web Development</option>
+                  <option value="consulting">Consulting</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="design">Design</option>
+                  <option value="support">Support &amp; Maintenance</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group full-width"><label for="service-description">Service Description *</label><textarea id="service-description" rows="3" placeholder="What does this service do? What problem does it solve?" required></textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label for="service-audience">Target Audience *</label><input type="text" id="service-audience" placeholder="e.g. Small business owners, e-commerce brands" required /></div>
+              <div class="form-group"><label for="service-price">Starting Price</label><input type="text" id="service-price" placeholder="e.g. From $499 / month" /></div>
+            </div>
+            <div class="form-group full-width"><label for="service-benefits">Key Benefits (one per line) *</label><textarea id="service-benefits" rows="4" placeholder="Saves 10+ hours per week&#10;No technical knowledge needed&#10;Done-for-you setup&#10;Ongoing support included" required></textarea></div>
+            <div class="form-group full-width"><label for="service-cta">Call to Action</label><input type="text" id="service-cta" placeholder="e.g. Book a free 30-min strategy call" /></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary" id="launch-submit"><span class="btn-icon">🚀</span>Generate Launch Kit</button></div>
+        </form>
+        <div id="launch-result" class="result-panel" style="display:none;"></div>
+      </div>
+
+      <!-- OUTREACH CAMPAIGN BUILDER -->
+      <div id="tab-outreach" class="tab-content">
+        <div class="tool-header">
+          <h2>Outreach Campaign Builder</h2>
+          <p>Enter a prospect's details to generate a ready-to-send multi-email follow-up sequence and pitch deck outline.</p>
+        </div>
+        <form id="outreach-form" class="toolkit-form">
+          <div class="form-section">
+            <h3>Prospect Details</h3>
+            <div class="form-row">
+              <div class="form-group"><label for="prospect-name">Prospect Name *</label><input type="text" id="prospect-name" placeholder="e.g. Sarah Johnson" /></div>
+              <div class="form-group"><label for="prospect-company">Company *</label><input type="text" id="prospect-company" placeholder="e.g. Pinnacle Retail" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label for="prospect-email">Prospect Email</label><input type="email" id="prospect-email" placeholder="e.g. sarah@pinnacleretail.com" /></div>
+              <div class="form-group">
+                <label for="prospect-service">Service Interest *</label>
+                <select id="prospect-service">
+                  <option value="">Select service...</option>
+                  <option value="Web Development">Web Development</option>
+                  <option value="Mobile App">Mobile App</option>
+                  <option value="Automation / Systems">Automation / Systems</option>
+                  <option value="Consulting">Consulting</option>
+                  <option value="Digital Marketing">Digital Marketing</option>
+                  <option value="UI/UX Design">UI/UX Design</option>
+                  <option value="CRM Setup">CRM Setup</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group full-width"><label for="prospect-notes">Notes / Context</label><textarea id="prospect-notes" rows="3" placeholder="Any relevant background about the prospect, their pain points, or how you connected..."></textarea></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary" id="outreach-submit"><span class="btn-icon">📣</span>Generate Campaign</button></div>
+        </form>
+        <div id="outreach-result" class="result-panel" style="display:none;"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="tab-settings" class="tab-content">
+        <div class="tool-header">
+          <h2>Business Settings</h2>
+          <p>Enter your business details once and they will be pre-filled in every generated document automatically.</p>
+        </div>
+        <form id="settings-form" class="toolkit-form">
+          <div class="form-section">
+            <h3>Your Business</h3>
+            <div class="form-row">
+              <div class="form-group"><label for="settings-business-name">Business Name</label><input type="text" id="settings-business-name" placeholder="e.g. SmartFlow Systems" /></div>
+              <div class="form-group"><label for="settings-your-name">Your Name</label><input type="text" id="settings-your-name" placeholder="e.g. Jane Smith" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label for="settings-email">Email Address</label><input type="email" id="settings-email" placeholder="e.g. hello@smartflowsystems.com" /></div>
+              <div class="form-group"><label for="settings-phone">Phone Number</label><input type="text" id="settings-phone" placeholder="e.g. +1 555 0100" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label for="settings-website">Website</label><input type="url" id="settings-website" placeholder="e.g. https://smartflowsystems.com" /></div>
+              <div class="form-group"><label for="settings-calendar">Calendar / Booking Link</label><input type="url" id="settings-calendar" placeholder="e.g. https://calendly.com/yourname" /></div>
+            </div>
+            <div class="form-group full-width"><label for="settings-logo">Logo URL</label><input type="url" id="settings-logo" placeholder="e.g. https://yoursite.com/logo.png" /></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary" id="settings-submit"><span class="btn-icon">💾</span>Save Settings</button></div>
+        </form>
+        <div id="settings-result" class="result-panel" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="sfs-circuit-flow.js"></script>
+  <script>
+    let currentUser = null;
+    let currentUsage = {};
+    let freeLimit = 5;
+
+    async function init() {
+      const res = await fetch("/auth/me");
+      const data = await res.json();
+      if (!data.user) { window.location.href = "/login.html"; return; }
+      currentUser = data.user;
+      currentUsage = data.usage || {};
+      freeLimit = data.freeLimit || 5;
+
+      document.getElementById("user-avatar").textContent = currentUser.name.charAt(0).toUpperCase();
+      document.getElementById("dd-name").textContent = currentUser.name;
+      document.getElementById("dd-email").textContent = currentUser.email;
+      document.getElementById("dd-plan").textContent = currentUser.plan === "paid" ? "⚡ Pro Plan" : "Free Plan";
+
+      updateUsagePill();
+
+      const settingsRes = await fetch("/api/settings");
+      const settingsData = await settingsRes.json();
+      if (settingsData.settings) populateSettings(settingsData.settings);
+
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("main-content").style.display = "flex";
+
+      setupTabs();
+      setupOnboardingWizard();
+      setupLaunchKit();
+      setupOutreach();
+      setupSettings();
+    }
+
+    function totalUsed() {
+      return Object.values(currentUsage).reduce((a, b) => a + b, 0);
+    }
+
+    function updateUsagePill() {
+      const pill = document.getElementById("usage-pill");
+      const upgradeBtn = document.getElementById("upgrade-btn");
+      if (currentUser.plan === "paid") {
+        pill.textContent = "⚡ Pro — Unlimited";
+        pill.classList.remove("limit");
+        pill.style.display = "inline-block";
+        upgradeBtn.style.display = "none";
+      } else {
+        const used = totalUsed();
+        const remaining = Math.max(0, freeLimit - used);
+        pill.textContent = remaining + " free generation" + (remaining !== 1 ? "s" : "") + " left";
+        pill.classList.toggle("limit", remaining === 0);
+        pill.style.display = "inline-block";
+        upgradeBtn.style.display = remaining <= 1 ? "inline-block" : "none";
+      }
+    }
+
+    async function startUpgrade() {
+      const btn = document.getElementById("upgrade-btn");
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+      const res = await fetch("/api/stripe/create-checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Could not start upgrade. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "⚡ Upgrade to Pro";
+      }
+    }
+
+    function toggleDropdown() {
+      document.getElementById("user-dropdown").classList.toggle("open");
+    }
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".user-menu")) {
+        document.getElementById("user-dropdown").classList.remove("open");
+      }
+    });
+
+    async function logout() {
+      await fetch("/auth/logout", { method: "POST" });
+      window.location.href = "/login.html";
+    }
+
+    function setupTabs() {
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+        });
+      });
+    }
+
+    function slugify(str) {
+      return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+
+    function setWizardStep(n) {
+      document.querySelectorAll(".wizard-step").forEach((p, i) => {
+        p.style.display = i + 1 === n ? "flex" : "none";
+      });
+      document.querySelectorAll(".step").forEach((s, i) => {
+        s.classList.remove("active", "completed");
+        if (i + 1 === n) s.classList.add("active");
+        else if (i + 1 < n) s.classList.add("completed");
+      });
+      document.querySelectorAll(".step-line").forEach((l, i) => {
+        l.classList.toggle("completed", i + 1 < n);
+      });
+    }
+
+    function buildReview(c) {
+      const budgetLabels = { "under-1k":"Under $1,000","1k-5k":"$1,000 – $5,000","5k-10k":"$5,000 – $10,000","10k-25k":"$10,000 – $25,000","25k-plus":"$25,000+" };
+      const timelineLabels = { "1-2-weeks":"1–2 Weeks","1-month":"1 Month","2-3-months":"2–3 Months","3-6-months":"3–6 Months","6-months-plus":"6+ Months" };
+      return [
+        ["Client", c.name], ["Company", c.company], ["Email", c.email||"—"], ["Phone", c.phone||"—"],
+        ["Project Type", (c.projectType||"").replace(/-/g," ")||"—"], ["Budget", budgetLabels[c.budget]||"—"],
+        ["Start Date", c.startDate||"TBC"], ["Duration", timelineLabels[c.timeline]||"—"]
+      ].map(([l,v]) => `<div class="review-row"><span class="review-label">${l}</span><span class="review-value">${v}</span></div>`).join("");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function buildResultHTML(title, desc, files) {
+      const fileRows = files.map((f) => {
+        const previewBtn = f.content
+          ? `<button class="btn-preview-toggle" onclick="toggleFilePreview(this)" data-content="${escapeHtml(f.content)}">▼ Preview</button>`
+          : "";
+        const copyBtn = f.content
+          ? `<button class="btn-copy" onclick="copyFileContent(this)" data-content="${escapeHtml(f.content)}">Copy</button>`
+          : "";
+        const downloadBtn = f.content
+          ? `<button class="btn-copy" onclick="downloadFile(this)" data-content="${escapeHtml(f.content)}" data-filename="${f.fileName||'file.txt'}" style="margin-left:4px">↓ Download</button>`
+          : "";
+        const preview = f.content
+          ? `<div class="file-preview-body" style="display:none;"><pre class="file-preview-pre">${escapeHtml(f.content)}</pre></div>`
+          : "";
+        return `<div class="result-file">
+          <div class="result-file-header">
+            <span class="result-file-icon">${f.icon}</span>
+            <div class="result-file-info"><div>${f.label}</div><div class="result-file-path">${f.fileName||""}</div></div>
+            <div class="result-file-actions">${copyBtn}${downloadBtn}${previewBtn}</div>
+          </div>${preview}</div>`;
+      }).join("");
+      return `<div class="result-header"><span class="result-icon">✅</span><h3>${title}</h3></div>
+        <p style="color:var(--text-secondary);font-size:13px;margin:8px 0 16px;">${desc}</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">${fileRows}</div>`;
+    }
+
+    function toggleFilePreview(btn) {
+      const body = btn.closest(".result-file").querySelector(".file-preview-body");
+      const open = body.style.display !== "none";
+      body.style.display = open ? "none" : "block";
+      btn.textContent = open ? "▼ Preview" : "▲ Hide";
+      btn.classList.toggle("active", !open);
+    }
+
+    async function copyFileContent(btn) {
+      const content = btn.dataset.content;
+      try {
+        await navigator.clipboard.writeText(content);
+      } catch (_) {
+        const ta = document.createElement("textarea");
+        ta.value = content; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }
+      const orig = btn.textContent;
+      btn.textContent = "Copied!";
+      btn.classList.add("btn-copy-success");
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove("btn-copy-success"); }, 1800);
+    }
+
+    function downloadFile(btn) {
+      const content = btn.dataset.content;
+      const filename = btn.dataset.filename || "file.txt";
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function callGenerate(endpoint, body, submitBtn, resultPanel, loadingText, doneTitle, doneDesc, resetBtnHTML) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add("btn-loading");
+      submitBtn.innerHTML = `<span class="btn-icon">⏳</span> ${loadingText}`;
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("btn-loading");
+      submitBtn.innerHTML = resetBtnHTML;
+
+      if (data.error === "free_limit_reached") {
+        resultPanel.className = "result-panel";
+        resultPanel.style.display = "block";
+        resultPanel.innerHTML = `<div class="upgrade-wall">
+          <h3>🔒 Monthly limit reached</h3>
+          <p>You've used all your free generations for this month.<br>Upgrade to Pro for unlimited access — generate as many documents as you need.</p>
+          <button class="upgrade-wall-btn" onclick="startUpgrade()" id="wall-upgrade-btn">⚡ Upgrade to Pro — Unlimited Access</button>
+        </div>`;
+        resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
+
+      if (!data.ok) {
+        resultPanel.className = "error-panel";
+        resultPanel.style.display = "block";
+        resultPanel.innerHTML = "⚠️ " + (data.error || "Something went wrong. Please try again.");
+        resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
+
+      if (data.remaining !== undefined && currentUser.plan !== "paid") {
+        const used = freeLimit - data.remaining;
+        currentUsage = {};
+        currentUsage["__total"] = used;
+        updateUsagePill();
+      }
+
+      resultPanel.className = "result-panel";
+      resultPanel.style.display = "block";
+      resultPanel.innerHTML = buildResultHTML(doneTitle, doneDesc, data.files);
+      resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function setupOnboardingWizard() {
+      setWizardStep(1);
+      document.getElementById("step1-next").addEventListener("click", () => {
+        const name = document.getElementById("client-name").value.trim();
+        const company = document.getElementById("client-company").value.trim();
+        if (!name || !company) { alert("Please enter Client Name and Company Name."); return; }
+        setWizardStep(2);
+      });
+      document.getElementById("step2-back").addEventListener("click", () => setWizardStep(1));
+      document.getElementById("step2-next").addEventListener("click", () => {
+        if (!document.getElementById("project-type").value) { alert("Please select a Project Type."); return; }
+        const c = getClientData();
+        document.getElementById("review-summary").innerHTML = buildReview(c);
+        setWizardStep(3);
+      });
+      document.getElementById("step3-back").addEventListener("click", () => setWizardStep(2));
+      document.getElementById("onboarding-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const c = getClientData();
+        await callGenerate(
+          "/api/generate/onboarding", c,
+          document.getElementById("onboarding-submit"),
+          document.getElementById("onboarding-result"),
+          "Generating files...",
+          "Onboarding files created!",
+          "Contract, checklist, and client brief for <strong>" + c.company + "</strong> are ready below.",
+          '<span class="btn-icon">⚡</span> Generate Onboarding Files'
+        );
+      });
+    }
+
+    function getClientData() {
+      return {
+        name: document.getElementById("client-name").value.trim(),
+        company: document.getElementById("client-company").value.trim(),
+        email: document.getElementById("client-email").value.trim(),
+        phone: document.getElementById("client-phone").value.trim(),
+        projectType: document.getElementById("project-type").value,
+        budget: document.getElementById("project-budget").value,
+        startDate: document.getElementById("project-start").value,
+        timeline: document.getElementById("project-timeline").value,
+        requirements: document.getElementById("project-requirements").value.trim(),
+      };
+    }
+
+    function setupLaunchKit() {
+      document.getElementById("launch-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const svc = {
+          name: document.getElementById("service-name").value.trim(),
+          category: document.getElementById("service-category").value,
+          description: document.getElementById("service-description").value.trim(),
+          audience: document.getElementById("service-audience").value.trim(),
+          price: document.getElementById("service-price").value.trim(),
+          benefits: document.getElementById("service-benefits").value.trim(),
+          cta: document.getElementById("service-cta").value.trim() || "Get in touch today",
+        };
+        await callGenerate(
+          "/api/generate/launch-kit", svc,
+          document.getElementById("launch-submit"),
+          document.getElementById("launch-result"),
+          "Generating kit...",
+          "Launch Kit ready!",
+          "Email pitch, social posts, and website section for <strong>" + svc.name + "</strong> are ready below.",
+          '<span class="btn-icon">🚀</span> Generate Launch Kit'
+        );
+      });
+    }
+
+    function setupOutreach() {
+      document.getElementById("outreach-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const p = {
+          name: document.getElementById("prospect-name").value.trim(),
+          company: document.getElementById("prospect-company").value.trim(),
+          email: document.getElementById("prospect-email").value.trim(),
+          service: document.getElementById("prospect-service").value,
+          notes: document.getElementById("prospect-notes").value.trim(),
+        };
+        if (!p.name || !p.company) { alert("Please enter a Prospect Name and Company."); return; }
+        if (!p.service) { alert("Please select a Service Interest."); return; }
+        await callGenerate(
+          "/api/generate/outreach", p,
+          document.getElementById("outreach-submit"),
+          document.getElementById("outreach-result"),
+          "Generating campaign...",
+          "Campaign files created!",
+          "3-email sequence and pitch deck for <strong>" + p.name + "</strong> at <strong>" + p.company + "</strong> are ready below.",
+          '<span class="btn-icon">📣</span> Generate Campaign'
+        );
+      });
+    }
+
+    function populateSettings(s) {
+      document.getElementById("settings-business-name").value = s.business_name || "";
+      document.getElementById("settings-your-name").value = s.your_name || "";
+      document.getElementById("settings-email").value = s.email || "";
+      document.getElementById("settings-phone").value = s.phone || "";
+      document.getElementById("settings-website").value = s.website || "";
+      document.getElementById("settings-calendar").value = s.calendar_link || "";
+      document.getElementById("settings-logo").value = s.logo_url || "";
+    }
+
+    function setupSettings() {
+      document.getElementById("settings-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("settings-submit");
+        const resultPanel = document.getElementById("settings-result");
+        btn.disabled = true;
+        btn.classList.add("btn-loading");
+        btn.innerHTML = '<span class="btn-icon">⏳</span> Saving...';
+
+        const settings = {
+          businessName: document.getElementById("settings-business-name").value.trim() || "SmartFlow Systems",
+          yourName: document.getElementById("settings-your-name").value.trim(),
+          email: document.getElementById("settings-email").value.trim(),
+          phone: document.getElementById("settings-phone").value.trim(),
+          website: document.getElementById("settings-website").value.trim(),
+          calendarLink: document.getElementById("settings-calendar").value.trim(),
+          logoUrl: document.getElementById("settings-logo").value.trim(),
+        };
+
+        const res = await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings),
+        });
+        const data = await res.json();
+
+        btn.disabled = false;
+        btn.classList.remove("btn-loading");
+        btn.innerHTML = '<span class="btn-icon">💾</span> Save Settings';
+
+        resultPanel.style.display = "block";
+        if (data.ok) {
+          resultPanel.className = "result-panel";
+          resultPanel.innerHTML = `<div class="result-header"><span class="result-icon">✅</span><h3>Settings saved!</h3></div><p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">Your business details will now be pre-filled in all generated documents.</p>`;
+        } else {
+          resultPanel.className = "error-panel";
+          resultPanel.innerHTML = "⚠️ " + (data.error || "Could not save settings.");
+        }
+        resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

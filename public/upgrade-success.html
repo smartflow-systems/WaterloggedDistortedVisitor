@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upgraded! — SFS Business Toolkit</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .success-card {
+      background: rgba(15,15,25,0.92);
+      border: 1px solid rgba(212,175,55,0.4);
+      border-radius: 18px;
+      padding: 56px 44px;
+      width: 100%;
+      max-width: 440px;
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .success-icon { font-size: 56px; margin-bottom: 20px; }
+    .success-card h1 { font-size: 26px; font-weight: 800; color: hsl(45,90%,65%); margin: 0 0 10px; }
+    .success-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 28px; }
+    .go-btn {
+      display: inline-block; padding: 13px 32px; border-radius: 10px;
+      background: linear-gradient(135deg, hsl(45,95%,60%), hsl(35,85%,45%));
+      color: #0a0a0f; font-weight: 800; font-size: 15px;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .go-btn:hover { opacity: .9; }
+  </style>
+</head>
+<body>
+  <canvas id="sfs-circuit"></canvas>
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <h1>You're now on Pro!</h1>
+    <p>Your account has been upgraded to the Pro plan. You now have unlimited document generations every month.</p>
+    <a href="/" class="go-btn">Go to Dashboard →</a>
+  </div>
+  <script src="sfs-circuit-flow.js"></script>
+</body>
+</html>
