@@ -60,6 +60,7 @@ async function main() {
   setupTabs();
   setupOnboardingWizard();
   setupLaunchKitGenerator();
+  setupOutreachCampaignBuilder(extensionReady);
   setupSettingsPanel(extensionReady);
 }
 
@@ -815,6 +816,365 @@ function generateWebsiteSection(s) {
 
   </div>
 </section>
+`;
+}
+
+function setupOutreachCampaignBuilder(extensionReady) {
+  const form = document.getElementById("outreach-form");
+  const resultPanel = document.getElementById("outreach-result");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("outreach-submit");
+    submitBtn.disabled = true;
+    submitBtn.classList.add("btn-loading");
+    submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Generating campaign...';
+
+    const prospect = {
+      name: document.getElementById("prospect-name").value.trim(),
+      company: document.getElementById("prospect-company").value.trim(),
+      email: document.getElementById("prospect-email").value.trim(),
+      service: document.getElementById("prospect-service").value,
+      notes: document.getElementById("prospect-notes").value.trim(),
+    };
+
+    if (!prospect.name || !prospect.company) {
+      alert("Please enter a Prospect Name and Company to continue.");
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("btn-loading");
+      submitBtn.innerHTML = '<span class="btn-icon">📣</span> Generate Campaign';
+      return;
+    }
+
+    if (!prospect.service) {
+      alert("Please select a Service Interest to continue.");
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("btn-loading");
+      submitBtn.innerHTML = '<span class="btn-icon">📣</span> Generate Campaign';
+      return;
+    }
+
+    const folderSlug = slugify(prospect.name);
+    const folderName = "outreach-campaigns/" + folderSlug;
+    const createdFiles = [];
+
+    try {
+      try { await replit.fs.createDir("outreach-campaigns"); } catch (_) {}
+      try { await replit.fs.createDir(folderName); } catch (_) {}
+
+      const email1 = generateOutreachEmail1(prospect);
+      const email1Path = folderName + "/email-1-intro.md";
+      await replit.fs.writeFile(email1Path, email1);
+      createdFiles.push({ icon: "📧", label: "Email 1 — Introduction", path: email1Path });
+
+      const email2 = generateOutreachEmail2(prospect);
+      const email2Path = folderName + "/email-2-followup.md";
+      await replit.fs.writeFile(email2Path, email2);
+      createdFiles.push({ icon: "📧", label: "Email 2 — Follow-Up", path: email2Path });
+
+      const email3 = generateOutreachEmail3(prospect);
+      const email3Path = folderName + "/email-3-final.md";
+      await replit.fs.writeFile(email3Path, email3);
+      createdFiles.push({ icon: "📧", label: "Email 3 — Final Check-In", path: email3Path });
+
+      const pitchDeck = generatePitchDeckOutline(prospect);
+      const pitchPath = folderName + "/pitch-deck-outline.md";
+      await replit.fs.writeFile(pitchPath, pitchDeck);
+      createdFiles.push({ icon: "🖼️", label: "Pitch Deck Outline", path: pitchPath });
+
+      const csvPath = "outreach-campaigns/prospects.csv";
+      await updateProspectsCSV(csvPath, prospect, folderName, extensionReady);
+      createdFiles.push({ icon: "📊", label: "Prospects Ledger (updated)", path: csvPath });
+
+      resultPanel.className = "result-panel";
+      resultPanel.style.display = "block";
+      resultPanel.innerHTML = buildResultHTML(
+        "Campaign files created!",
+        "Outreach campaign for <strong>" + prospect.name + "</strong> at <strong>" + prospect.company + "</strong> saved to <code>" + folderName + "/</code>",
+        createdFiles
+      );
+      try {
+        await replit.messages.showConfirm("📣 Outreach campaign generated for " + prospect.name + "!");
+      } catch (_) {}
+    } catch (err) {
+      resultPanel.className = "error-panel";
+      resultPanel.style.display = "block";
+      resultPanel.innerHTML = "⚠️ Could not write files. Open this tool inside Replit Extension Devtools for full functionality. (" + err.message + ")";
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("btn-loading");
+    submitBtn.innerHTML = '<span class="btn-icon">📣</span> Generate Campaign';
+
+    resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+async function updateProspectsCSV(csvPath, prospect, folderPath, extensionReady) {
+  const csvHeader = "Date,Prospect Name,Company,Service Interest,Email,Campaign Folder\n";
+  const row = [
+    today(),
+    '"' + prospect.name.replace(/"/g, '""') + '"',
+    '"' + prospect.company.replace(/"/g, '""') + '"',
+    '"' + prospect.service.replace(/"/g, '""') + '"',
+    '"' + (prospect.email || "").replace(/"/g, '""') + '"',
+    '"' + folderPath + '"',
+  ].join(",") + "\n";
+
+  if (!extensionReady) {
+    return;
+  }
+
+  let existingContent = "";
+  try {
+    const result = await replit.fs.readFile(csvPath, "utf8");
+    existingContent = result.content;
+  } catch (_) {
+    existingContent = csvHeader;
+  }
+
+  if (!existingContent.startsWith("Date,")) {
+    existingContent = csvHeader + existingContent;
+  }
+
+  await replit.fs.writeFile(csvPath, existingContent + row);
+}
+
+function generateOutreachEmail1(p) {
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const senderPhone = sfsSettings.phone || "[Your Phone]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
+  return `# Email 1 — Introduction
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Generated:** ${today()}
+
+---
+
+## Subject Line Options
+
+1. A quick idea for ${p.company}
+2. How we help businesses like ${p.company} with ${p.service}
+3. ${senderBusiness} → ${p.company}: worth a conversation?
+
+---
+
+## Email Body
+
+**Subject:** A quick idea for ${p.company}
+
+Hi ${p.name.split(" ")[0]},
+
+I came across ${p.company} and wanted to reach out — I think we could genuinely help you.
+
+At ${senderBusiness}, we specialise in ${p.service} for businesses like yours. We've helped clients save time, reduce friction, and grow their revenue by putting the right systems in place.
+
+${p.notes ? `I noticed that ${p.notes}\n\nThat's exactly the kind of challenge we solve every day.` : `I'd love to learn more about what you're working on and see if there's a fit.`}
+
+Would you be open to a quick 20-minute call this week?
+
+${calendarLink ? `You can grab a time that suits you here: ${calendarLink}` : "Just reply to this email and we'll find a time."}
+
+Best,
+${senderName}
+${senderBusiness}
+${senderEmail ? senderEmail : ""}${senderPhone ? " | " + senderPhone : ""}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
+`;
+}
+
+function generateOutreachEmail2(p) {
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
+  return `# Email 2 — Follow-Up
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Send:** 4–5 days after Email 1
+**Generated:** ${today()}
+
+---
+
+## Subject Line Options
+
+1. Re: A quick idea for ${p.company}
+2. Still thinking about ${p.company}...
+3. Following up — ${p.service} for ${p.company}
+
+---
+
+## Email Body
+
+**Subject:** Re: A quick idea for ${p.company}
+
+Hi ${p.name.split(" ")[0]},
+
+Just following up on my note from earlier this week — I know inboxes get busy!
+
+I wanted to share one thing: most businesses we work with in ${p.company}'s space tell us their biggest bottleneck before working with us was [common pain point related to ${p.service}]. Sound familiar?
+
+We've put together a short overview of how ${senderBusiness} approaches ${p.service} — happy to walk you through it on a quick call.
+
+No hard sell, just a conversation to see if it makes sense.
+
+${calendarLink ? `Book a slot here: ${calendarLink}` : "Just hit reply and let me know a time that works."}
+
+Best,
+${senderName}
+${senderBusiness}
+${senderEmail ? senderEmail : ""}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
+`;
+}
+
+function generateOutreachEmail3(p) {
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
+  return `# Email 3 — Final Check-In
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Send:** 7–10 days after Email 2
+**Generated:** ${today()}
+
+---
+
+## Subject Line Options
+
+1. Last note from ${senderBusiness}
+2. Closing the loop — ${p.company}
+3. One last thought for ${p.name.split(" ")[0]}
+
+---
+
+## Email Body
+
+**Subject:** Last note from ${senderBusiness}
+
+Hi ${p.name.split(" ")[0]},
+
+I don't want to overstay my welcome, so this is my last follow-up for now.
+
+If ${p.service} is something ${p.company} is looking to improve in the next few months, I'd love to have a quick chat and show you what's possible.
+
+If the timing isn't right — no problem at all. Feel free to reach out whenever it makes sense.
+
+${calendarLink ? `If you'd like to connect: ${calendarLink}` : "You can reply any time — I'll be here."}
+
+Wishing you and the team at ${p.company} all the best,
+
+${senderName}
+${senderBusiness}
+${senderEmail ? senderEmail : ""}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
+`;
+}
+
+function generatePitchDeckOutline(p) {
+  const bizName = sfsSettings.businessName || "SmartFlow Systems";
+  const bizWebsite = sfsSettings.website || "[Your Website]";
+
+  return `# Pitch Deck Outline — ${p.company}
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Prepared by:** ${bizName}
+**Date:** ${today()}
+
+---
+
+## Slide 1 — Title Slide
+
+- **Headline:** ${p.service} for ${p.company}
+- **Subheadline:** How ${bizName} can help
+- **Prepared for:** ${p.name}, ${p.company}
+- **Date:** ${today()}
+
+---
+
+## Slide 2 — The Problem
+
+- What challenges does ${p.company} face without the right ${p.service} solution?
+- Frame 2–3 specific pain points (e.g. manual processes, lost leads, slow delivery)
+- Use a relatable stat or quote if possible
+${p.notes ? `\n> Context: ${p.notes}` : ""}
+
+---
+
+## Slide 3 — The Solution
+
+- Introduce ${bizName}'s approach to ${p.service}
+- High-level overview of what you do and how it's different
+- Focus on outcomes, not features
+
+---
+
+## Slide 4 — How It Works
+
+- Step 1: Discovery & Scope
+- Step 2: Build / Implement
+- Step 3: Test & Deliver
+- Step 4: Ongoing Support (if applicable)
+
+Keep this simple — 3 to 5 steps max.
+
+---
+
+## Slide 5 — What's Included
+
+- List the key deliverables relevant to ${p.service}
+- Be specific: e.g. "Full build & deployment", "Staff training session", "30-day post-launch support"
+
+---
+
+## Slide 6 — Why ${bizName}
+
+- Key differentiators (speed, quality, communication, track record)
+- Brief stats or proof points: e.g. "X clients served", "Average turnaround Y weeks"
+- One or two short testimonials or client logos (anonymised if needed)
+
+---
+
+## Slide 7 — Investment
+
+- Pricing tiers or a starting-from price for ${p.service}
+- Payment structure (e.g. 50% upfront, 50% on delivery)
+- What's NOT included (scope clarity)
+
+---
+
+## Slide 8 — Next Steps
+
+- Step 1: Schedule a discovery call
+- Step 2: Receive tailored proposal within 48 hours
+- Step 3: Sign off and kick off
+
+**CTA:** ${sfsSettings.calendarLink || "Book a call at " + bizWebsite}
+
+---
+
+## Slide 9 — Thank You
+
+- ${bizName} contact details
+- Website: ${bizWebsite}
+- Email: ${sfsSettings.email || "[Your Email]"}
+- Phone: ${sfsSettings.phone || "[Your Phone]"}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
 `;
 }
 

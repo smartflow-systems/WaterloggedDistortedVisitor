@@ -36,6 +36,10 @@
             <span class="tab-icon">🚀</span>
             Service Launch Kit
           </button>
+          <button class="tab-btn" data-tab="outreach">
+            <span class="tab-icon">📣</span>
+            Outreach Campaigns
+          </button>
           <button class="tab-btn" data-tab="settings">
             <span class="tab-icon">⚙️</span>
             Settings
@@ -256,6 +260,75 @@
           </form>
 
           <div id="launch-result" class="result-panel" style="display:none;"></div>
+        </div>
+
+        <!-- OUTREACH CAMPAIGN BUILDER -->
+        <div id="tab-outreach" class="tab-content">
+          <div class="tool-header">
+            <h2>Outreach Campaign Builder</h2>
+            <p>Enter a prospect's details to generate a ready-to-send multi-email follow-up sequence, a pitch deck outline, and a running prospects ledger — all saved straight to your workspace.</p>
+          </div>
+
+          <form id="outreach-form" class="toolkit-form">
+            <div class="form-section">
+              <h3>Prospect Details</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prospect-name">Prospect Name *</label>
+                  <input type="text" id="prospect-name" placeholder="e.g. Sarah Johnson" />
+                </div>
+                <div class="form-group">
+                  <label for="prospect-company">Company *</label>
+                  <input type="text" id="prospect-company" placeholder="e.g. Pinnacle Retail" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prospect-email">Prospect Email</label>
+                  <input type="email" id="prospect-email" placeholder="e.g. sarah@pinnacleretail.com" />
+                </div>
+                <div class="form-group">
+                  <label for="prospect-service">Service Interest *</label>
+                  <select id="prospect-service">
+                    <option value="">Select service...</option>
+                    <option value="Web Development">Web Development</option>
+                    <option value="Mobile App">Mobile App</option>
+                    <option value="Automation / Systems">Automation / Systems</option>
+                    <option value="Consulting">Consulting</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="UI/UX Design">UI/UX Design</option>
+                    <option value="CRM Setup">CRM Setup</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="prospect-notes">Notes / Context</label>
+                <textarea id="prospect-notes" rows="3" placeholder="Any relevant background about the prospect, their pain points, or how you connected..."></textarea>
+              </div>
+            </div>
+
+            <div class="form-section" style="background:rgba(74,158,255,0.04);border-color:rgba(74,158,255,0.2);">
+              <h3 style="color:var(--accent);">Files &amp; folders that will be created</h3>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div class="result-file"><span class="result-file-icon">📁</span><div><div>Campaign folder</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/</div></div></div>
+                <div class="result-file"><span class="result-file-icon">📧</span><div><div>Email 1 — Introduction</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-1-intro.md</div></div></div>
+                <div class="result-file"><span class="result-file-icon">📧</span><div><div>Email 2 — Follow-Up</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-2-followup.md</div></div></div>
+                <div class="result-file"><span class="result-file-icon">📧</span><div><div>Email 3 — Final Check-In</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-3-final.md</div></div></div>
+                <div class="result-file"><span class="result-file-icon">🖼️</span><div><div>Pitch Deck Outline</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/pitch-deck-outline.md</div></div></div>
+                <div class="result-file"><span class="result-file-icon">📊</span><div><div>Prospects Ledger (updated)</div><div class="result-file-path">outreach-campaigns/prospects.csv</div></div></div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="outreach-submit">
+                <span class="btn-icon">📣</span>
+                Generate Campaign
+              </button>
+            </div>
+          </form>
+
+          <div id="outreach-result" class="result-panel" style="display:none;"></div>
         </div>
 
         <!-- SETTINGS -->
