@@ -1,0 +1,422 @@
+/**
+ * SFS FAMILY THEME - Complete Theme System
+ * Luxurious gold on dark marble with circuit-flow animations
+ *
+ * Usage: Import this file at the root of your project
+ * <link rel="stylesheet" href="path/to/sfs-complete-theme.css" />
+ */
+
+/* ===========================
+   THEME CONFIGURATION
+   =========================== */
+
+:root {
+  /* === SFS FAMILY CORE COLORS === */
+  /* Primary palette: Luxurious gold on dark marble */
+  --sf-black: 0 0% 8%;                    /* Deep marble black */
+  --sf-brown: 25 15% 12%;                 /* Brown-tinted black */
+  --sf-gold: 45 95% 65%;                  /* Sparkling gold */
+  --sf-gold-light: 45 95% 75%;            /* Lighter gold for hover */
+  --sf-gold-dark: 45 95% 55%;             /* Darker gold for active */
+
+  /* === SEMANTIC COLORS === */
+  --background: var(--sf-black);
+  --foreground: 45 20% 95%;               /* Beige/white text */
+  --muted-foreground: 45 10% 65%;         /* Muted beige */
+
+  /* Card & Surface colors */
+  --card: 25 15% 10%;                     /* Slightly lighter than black */
+  --card-foreground: 45 20% 95%;
+  --card-border: var(--sf-gold);
+  --card-glow: 45 95% 65% / 0.3;
+
+  /* Interactive elements */
+  --primary: var(--sf-gold);
+  --primary-foreground: var(--sf-black);
+  --primary-hover: var(--sf-gold-light);
+  --primary-active: var(--sf-gold-dark);
+
+  /* Accent colors */
+  --accent: 45 85% 60%;
+  --accent-foreground: var(--sf-black);
+
+  /* Status colors (with gold tint) */
+  --success: 142 70% 55%;                 /* Green with warmth */
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 60%;                  /* Warm orange-gold */
+  --warning-foreground: 0 0% 10%;
+  --error: 0 72% 55%;                     /* Warm red */
+  --error-foreground: 0 0% 98%;
+  --info: 200 80% 55%;                    /* Cool blue */
+  --info-foreground: 0 0% 98%;
+
+  /* Borders & dividers */
+  --border: 45 30% 25%;                   /* Subtle gold tint */
+  --border-gold: var(--sf-gold);
+  --divider: 45 20% 20%;
+
+  /* === GLASSMORPHISM TOKENS === */
+  --glass-bg: 25 15% 12% / 0.6;           /* Semi-transparent brown-black */
+  --glass-border: 45 95% 65% / 0.2;       /* Subtle gold border */
+  --glass-glow: 45 95% 65% / 0.15;        /* Hover glow */
+  --glass-glow-strong: 45 95% 65% / 0.35; /* Active glow */
+  --glass-blur: 16px;                     /* Backdrop blur amount */
+
+  /* === ELEVATION & SHADOWS === */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 20px hsl(45 95% 65% / 0.3);
+  --shadow-gold-strong: 0 0 30px hsl(45 95% 65% / 0.5);
+
+  /* === SPACING TOKENS === */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+
+  /* === BORDER RADIUS === */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;
+
+  /* === TYPOGRAPHY === */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Georgia', serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+
+  /* Font sizes */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+
+  /* === CRICKIT FLOW EASING === */
+  --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* === ANIMATION DURATIONS === */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* === Z-INDEX LAYERS === */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-overlay: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+}
+
+/* ===========================
+   GLASS CARD SYSTEM
+   =========================== */
+
+.glass-card {
+  background: hsl(var(--glass-bg));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid hsl(var(--glass-border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--glass-border));
+  transition: all var(--duration-normal) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--sf-gold) / 0.05) 0%,
+    transparent 50%,
+    hsl(var(--sf-gold) / 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  border-color: hsl(var(--sf-gold) / 0.5);
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+  transform: translateY(-2px);
+}
+
+.glass-card:hover::before {
+  opacity: 1;
+}
+
+.glass-card-strong {
+  background: hsl(var(--card));
+  backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
+  border: 2px solid hsl(var(--sf-gold) / 0.3);
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+}
+
+.glass-card-strong:hover {
+  border-color: hsl(var(--sf-gold) / 0.6);
+  box-shadow: var(--shadow-lg), var(--shadow-gold-strong);
+}
+
+/* ===========================
+   GOLDEN GLOW EFFECTS
+   =========================== */
+
+.golden-glow {
+  position: relative;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.golden-glow::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at center,
+    hsl(var(--sf-gold) / 0.2) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.golden-glow:hover::after {
+  opacity: 1;
+}
+
+/* ===========================
+   BUTTONS - SFS FAMILY STYLE
+   =========================== */
+
+.btn-gold {
+  background: linear-gradient(135deg, hsl(var(--sf-gold)) 0%, hsl(var(--sf-gold-dark)) 100%);
+  color: hsl(var(--sf-black));
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: var(--shadow-sm), 0 0 0 1px hsl(var(--sf-gold) / 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, hsl(var(--sf-gold-light) / 0.3) 100%);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-smooth);
+}
+
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+}
+
+.btn-gold:hover::before {
+  opacity: 1;
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-outline-gold {
+  background: transparent;
+  color: hsl(var(--sf-gold));
+  border: 2px solid hsl(var(--sf-gold) / 0.5);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-outline-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--sf-gold) / 0.1);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-smooth);
+}
+
+.btn-outline-gold:hover {
+  border-color: hsl(var(--sf-gold));
+  box-shadow: 0 0 20px hsl(var(--sf-gold) / 0.3);
+}
+
+.btn-outline-gold:hover::before {
+  opacity: 1;
+}
+
+/* ===========================
+   INPUTS - SFS FAMILY STYLE
+   =========================== */
+
+.input-gold {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  transition: all var(--duration-normal) var(--ease-smooth);
+  outline: none;
+}
+
+.input-gold:focus {
+  border-color: hsl(var(--sf-gold));
+  box-shadow: 0 0 0 3px hsl(var(--sf-gold) / 0.1);
+}
+
+.input-gold::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ===========================
+   BADGES - SFS FAMILY STYLE
+   =========================== */
+
+.badge-gold {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background: hsl(var(--sf-gold) / 0.2);
+  color: hsl(var(--sf-gold));
+  border: 1px solid hsl(var(--sf-gold) / 0.3);
+}
+
+/* ===========================
+   UTILITY CLASSES
+   =========================== */
+
+.text-gold { color: hsl(var(--sf-gold)); }
+.text-beige { color: hsl(var(--foreground)); }
+.text-muted { color: hsl(var(--muted-foreground)); }
+
+.bg-marble { background: hsl(var(--sf-black)); }
+.bg-brown { background: hsl(var(--sf-brown)); }
+.bg-gold { background: hsl(var(--sf-gold)); }
+
+.border-gold { border-color: hsl(var(--sf-gold)); }
+.border-subtle { border-color: hsl(var(--border)); }
+
+.shadow-gold { box-shadow: var(--shadow-gold); }
+.shadow-gold-strong { box-shadow: var(--shadow-gold-strong); }
+
+/* ===========================
+   ANIMATIONS
+   =========================== */
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--sf-gold) / 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px hsl(var(--sf-gold) / 0);
+  }
+}
+
+.pulse-gold {
+  animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--sf-gold) / 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ===========================
+   SCROLLBAR - SFS FAMILY STYLE
+   =========================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--sf-black));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--sf-gold) / 0.3);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--sf-gold) / 0.5);
+}
+
+/* ===========================
+   SELECTION
+   =========================== */
+
+::selection {
+  background: hsl(var(--sf-gold) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+::-moz-selection {
+  background: hsl(var(--sf-gold) / 0.3);
+  color: hsl(var(--foreground));
+}
