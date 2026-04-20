@@ -302,19 +302,33 @@
                   </select>
                 </div>
               </div>
-              <div class="form-group full-width">
-                <label for="prospect-notes">Notes / Context</label>
-                <textarea id="prospect-notes" rows="3" placeholder="Any relevant background about the prospect, their pain points, or how you connected..."></textarea>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prospect-notes">Notes / Context</label>
+                  <textarea id="prospect-notes" rows="3" placeholder="Any relevant background about the prospect, their pain points, or how you connected..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="sequence-length">Number of Follow-Up Emails</label>
+                  <select id="sequence-length">
+                    <option value="1">1 email</option>
+                    <option value="2">2 emails</option>
+                    <option value="3" selected>3 emails (default)</option>
+                    <option value="4">4 emails</option>
+                    <option value="5">5 emails</option>
+                  </select>
+                </div>
               </div>
             </div>
 
             <div class="form-section" style="background:rgba(74,158,255,0.04);border-color:rgba(74,158,255,0.2);">
               <h3 style="color:var(--accent);">Files &amp; folders that will be created</h3>
-              <div style="display:flex;flex-direction:column;gap:8px;">
+              <div id="outreach-files-preview" style="display:flex;flex-direction:column;gap:8px;">
                 <div class="result-file"><div class="result-file-header"><span class="result-file-icon">📁</span><div class="result-file-info"><div>Campaign folder</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/</div></div></div></div>
                 <div class="result-file"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 1 — Introduction</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-1-intro.md</div></div></div></div>
-                <div class="result-file"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 2 — Follow-Up</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-2-followup.md</div></div></div></div>
-                <div class="result-file"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 3 — Final Check-In</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-3-final.md</div></div></div></div>
+                <div class="result-file sequence-email-row" data-min-seq="2"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 2 — Value-Add Follow-Up</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-2-valueadd.md</div></div></div></div>
+                <div class="result-file sequence-email-row" data-min-seq="3"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 3 — Case Study / Social Proof</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-3-casestudy.md</div></div></div></div>
+                <div class="result-file sequence-email-row" data-min-seq="4"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 4 — Urgency Touch</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-4-urgency.md</div></div></div></div>
+                <div class="result-file sequence-email-row" data-min-seq="5"><div class="result-file-header"><span class="result-file-icon">📧</span><div class="result-file-info"><div>Email 5 — Final Check-In</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/email-5-final.md</div></div></div></div>
                 <div class="result-file"><div class="result-file-header"><span class="result-file-icon">🖼️</span><div class="result-file-info"><div>Pitch Deck Outline</div><div class="result-file-path">outreach-campaigns/&lt;prospect-name&gt;/pitch-deck-outline.md</div></div></div></div>
                 <div class="result-file"><div class="result-file-header"><span class="result-file-icon">📊</span><div class="result-file-info"><div>Prospects Ledger (updated)</div><div class="result-file-path">outreach-campaigns/prospects.csv</div></div></div></div>
               </div>

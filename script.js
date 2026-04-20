@@ -836,6 +836,19 @@ function setupOutreachCampaignBuilder(extensionReady) {
     refreshBtn.addEventListener("click", () => loadProspectsLedger(extensionReady));
   }
 
+  const seqSelect = document.getElementById("sequence-length");
+  if (seqSelect) {
+    function updateFilesPreview() {
+      const n = parseInt(seqSelect.value, 10) || 3;
+      document.querySelectorAll(".sequence-email-row").forEach((row) => {
+        const minSeq = parseInt(row.getAttribute("data-min-seq"), 10);
+        row.style.display = n >= minSeq ? "" : "none";
+      });
+    }
+    seqSelect.addEventListener("change", updateFilesPreview);
+    updateFilesPreview();
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -851,6 +864,7 @@ function setupOutreachCampaignBuilder(extensionReady) {
       service: document.getElementById("prospect-service").value,
       notes: document.getElementById("prospect-notes").value.trim(),
     };
+    const sequenceLength = Math.min(Math.max(parseInt(document.getElementById("sequence-length").value, 10) || 3, 1), 5);
 
     if (!prospect.name || !prospect.company) {
       alert("Please enter a Prospect Name and Company to continue.");
@@ -876,20 +890,21 @@ function setupOutreachCampaignBuilder(extensionReady) {
       try { await replit.fs.createDir("outreach-campaigns"); } catch (_) {}
       try { await replit.fs.createDir(folderName); } catch (_) {}
 
-      const email1 = generateOutreachEmail1(prospect);
-      const email1Path = folderName + "/email-1-intro.md";
-      await replit.fs.writeFile(email1Path, email1);
-      createdFiles.push({ icon: "📧", label: "Email 1 — Introduction", path: email1Path, content: email1 });
+      const emailSequence = [
+        { fn: generateOutreachEmail1, file: "email-1-intro.md",       label: "Email 1 — Introduction" },
+        { fn: generateOutreachEmail2, file: "email-2-valueadd.md",    label: "Email 2 — Value-Add Follow-Up" },
+        { fn: generateOutreachEmail3, file: "email-3-casestudy.md",   label: "Email 3 — Case Study / Social Proof" },
+        { fn: generateOutreachEmail4, file: "email-4-urgency.md",     label: "Email 4 — Urgency Touch" },
+        { fn: generateOutreachEmail5, file: "email-5-final.md",       label: "Email 5 — Final Check-In" },
+      ];
 
-      const email2 = generateOutreachEmail2(prospect);
-      const email2Path = folderName + "/email-2-followup.md";
-      await replit.fs.writeFile(email2Path, email2);
-      createdFiles.push({ icon: "📧", label: "Email 2 — Follow-Up", path: email2Path, content: email2 });
-
-      const email3 = generateOutreachEmail3(prospect);
-      const email3Path = folderName + "/email-3-final.md";
-      await replit.fs.writeFile(email3Path, email3);
-      createdFiles.push({ icon: "📧", label: "Email 3 — Final Check-In", path: email3Path, content: email3 });
+      for (let i = 0; i < sequenceLength; i++) {
+        const step = emailSequence[i];
+        const content = step.fn(prospect, i + 1);
+        const filePath = folderName + "/" + step.file;
+        await replit.fs.writeFile(filePath, content);
+        createdFiles.push({ icon: "📧", label: step.label, path: filePath, content });
+      }
 
       const pitchDeck = generatePitchDeckOutline(prospect);
       const pitchPath = folderName + "/pitch-deck-outline.md";
@@ -1177,7 +1192,7 @@ function generateOutreachEmail2(p) {
   const senderEmail = sfsSettings.email || "[Your Email]";
   const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
 
-  return `# Email 2 — Follow-Up
+  return `# Email 2 — Value-Add Follow-Up
 **Prospect:** ${p.name} | ${p.company}
 **Service Interest:** ${p.service}
 **Send:** 4–5 days after Email 1
@@ -1188,8 +1203,8 @@ function generateOutreachEmail2(p) {
 ## Subject Line Options
 
 1. Re: A quick idea for ${p.company}
-2. Still thinking about ${p.company}...
-3. Following up — ${p.service} for ${p.company}
+2. One thing that could help ${p.company} with ${p.service}
+3. Quick value share for ${p.name.split(" ")[0]}
 
 ---
 
@@ -1225,10 +1240,106 @@ function generateOutreachEmail3(p) {
   const senderEmail = sfsSettings.email || "[Your Email]";
   const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
 
-  return `# Email 3 — Final Check-In
+  return `# Email 3 — Case Study / Social Proof
 **Prospect:** ${p.name} | ${p.company}
 **Service Interest:** ${p.service}
-**Send:** 7–10 days after Email 2
+**Send:** 3–4 days after Email 2
+**Generated:** ${today()}
+
+---
+
+## Subject Line Options
+
+1. How a business like ${p.company} got results with ${p.service}
+2. A quick success story for ${p.name.split(" ")[0]}
+3. Real results — ${p.service} in action
+
+---
+
+## Email Body
+
+**Subject:** How a business like ${p.company} got results with ${p.service}
+
+Hi ${p.name.split(" ")[0]},
+
+I wanted to share a quick story that might resonate with you.
+
+A client in a similar position to ${p.company} came to us struggling with [specific challenge related to ${p.service}]. Within [timeframe], we helped them [key outcome — e.g. cut manual work by 40%, increase qualified leads by 30%].
+
+The approach we used is directly applicable to what ${p.company} is doing. I think you'd find it interesting.
+
+Would it be worth 15 minutes to walk you through what we did and how it might translate for you?
+
+${calendarLink ? `Grab a time here: ${calendarLink}` : "Just reply and we'll set something up."}
+
+Best,
+${senderName}
+${senderBusiness}
+${senderEmail ? senderEmail : ""}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
+`;
+}
+
+function generateOutreachEmail4(p) {
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
+  return `# Email 4 — Urgency Touch
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Send:** 3–4 days after Email 3
+**Generated:** ${today()}
+
+---
+
+## Subject Line Options
+
+1. Before you decide — one more thing for ${p.company}
+2. Limited availability — ${p.service} projects this quarter
+3. Are you still looking at ${p.service}, ${p.name.split(" ")[0]}?
+
+---
+
+## Email Body
+
+**Subject:** Before you decide — one more thing for ${p.company}
+
+Hi ${p.name.split(" ")[0]},
+
+I know you've been busy, so I'll keep this short.
+
+We're currently onboarding a small number of new ${p.service} clients this quarter and I wanted to make sure ${p.company} had the chance to be one of them before spots fill up.
+
+Working with a focused group lets us give each client the attention they deserve and deliver faster results.
+
+If ${p.service} is on your radar for the coming months, now is a great time to have a quick conversation.
+
+${calendarLink ? `You can book directly here: ${calendarLink}` : "Hit reply and let's find 15 minutes."}
+
+Best,
+${senderName}
+${senderBusiness}
+${senderEmail ? senderEmail : ""}
+
+---
+*Generated by SFS Business Toolkit on ${today()}.*
+`;
+}
+
+function generateOutreachEmail5(p) {
+  const senderName = sfsSettings.yourName || "[Your Name]";
+  const senderBusiness = sfsSettings.businessName || "SmartFlow Systems";
+  const senderEmail = sfsSettings.email || "[Your Email]";
+  const calendarLink = sfsSettings.calendarLink || "[Your Calendar Link]";
+
+  return `# Email 5 — Final Check-In
+**Prospect:** ${p.name} | ${p.company}
+**Service Interest:** ${p.service}
+**Send:** 7–10 days after Email 4
 **Generated:** ${today()}
 
 ---
